@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Settings, 
   Upload, 
@@ -9,39 +9,89 @@ import {
   MapPin,
   Heart,
   Code,
-  Clock
+  Clock,
+  Sparkles,
+  Bot,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '../components/Button';
 import { CSVUpload } from '../components/admin/CSVUpload';
 import { AnalyticsCard } from '../components/admin/AnalyticsCard';
 import { WeightSlider } from '../components/admin/WeightSlider';
+import { RecommendationWeights } from '../services/recommendationEngine';
+import { checkOllamaHealth } from '../services/ollamaService';
 
-export function AdminPage() {
-  const [skillWeight, setSkillWeight] = useState(40);
-  const [interestWeight, setInterestWeight] = useState(35);
-  const [locationWeight, setLocationWeight] = useState(25);
+interface AdminPageProps {
+  weights: RecommendationWeights;
+  onWeightsChange: (weights: RecommendationWeights) => void;
+}
+
+export function AdminPage({ weights, onWeightsChange }: AdminPageProps) {
+  const [skillWeight, setSkillWeight] = useState(weights.skill);
+  const [interestWeight, setInterestWeight] = useState(weights.interest);
+  const [locationWeight, setLocationWeight] = useState(weights.location);
+  const [ollamaStatus, setOllamaStatus] = useState<{ available: boolean; models: string[] } | null>(null);
+  const [isCheckingOllama, setIsCheckingOllama] = useState(false);
+
+  // Sync with parent weights
+  useEffect(() => {
+    setSkillWeight(weights.skill);
+    setInterestWeight(weights.interest);
+    setLocationWeight(weights.location);
+  }, [weights]);
+
+  // Check Ollama status on mount
+  useEffect(() => {
+    checkOllamaStatus();
+  }, []);
+
+  const checkOllamaStatus = async () => {
+    setIsCheckingOllama(true);
+    try {
+      const status = await checkOllamaHealth();
+      setOllamaStatus(status);
+    } catch {
+      setOllamaStatus({ available: false, models: [] });
+    }
+    setIsCheckingOllama(false);
+  };
 
   // Normalize weights to always sum to 100%
   const normalizeWeights = (changed: 'skill' | 'interest' | 'location', newValue: number) => {
     const total = 100;
     const remaining = total - newValue;
 
+    let newSkill = skillWeight;
+    let newInterest = interestWeight;
+    let newLocation = locationWeight;
+
     if (changed === 'skill') {
-      setSkillWeight(newValue);
+      newSkill = newValue;
       const ratio = remaining / (interestWeight + locationWeight);
-      setInterestWeight(Math.round(interestWeight * ratio));
-      setLocationWeight(Math.round(locationWeight * ratio));
+      newInterest = Math.round(interestWeight * ratio);
+      newLocation = Math.round(locationWeight * ratio);
     } else if (changed === 'interest') {
-      setInterestWeight(newValue);
+      newInterest = newValue;
       const ratio = remaining / (skillWeight + locationWeight);
-      setSkillWeight(Math.round(skillWeight * ratio));
-      setLocationWeight(Math.round(locationWeight * ratio));
+      newSkill = Math.round(skillWeight * ratio);
+      newLocation = Math.round(locationWeight * ratio);
     } else {
-      setLocationWeight(newValue);
+      newLocation = newValue;
       const ratio = remaining / (skillWeight + interestWeight);
-      setSkillWeight(Math.round(skillWeight * ratio));
-      setInterestWeight(Math.round(interestWeight * ratio));
+      newSkill = Math.round(skillWeight * ratio);
+      newInterest = Math.round(interestWeight * ratio);
     }
+
+    setSkillWeight(newSkill);
+    setInterestWeight(newInterest);
+    setLocationWeight(newLocation);
+
+    // Notify parent of weight changes
+    onWeightsChange({
+      skill: newSkill,
+      interest: newInterest,
+      location: newLocation
+    });
   };
 
   const auditLog = [
@@ -137,6 +187,87 @@ export function AdminPage() {
               iconBgColor="var(--color-primary-100)"
               iconColor="var(--color-primary-600)"
             />
+          </div>
+        </section>
+
+        {/* AI System Status */}
+        <section className="mb-8">
+          <h2 className="text-xl mb-6 flex items-center gap-2">
+            <Bot className="w-6 h-6 text-[var(--color-primary-600)]" />
+            AI System Status
+          </h2>
+          <div className="bg-white rounded-xl border-2 border-[var(--color-neutral-200)] p-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Ollama Status */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${ollamaStatus?.available ? 'bg-[var(--color-success-500)]' : 'bg-[var(--color-error-500)]'} animate-pulse`} />
+                    <span className="font-medium">Ollama (Llama AI)</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={checkOllamaStatus}
+                    leftIcon={<RefreshCw className={`w-4 h-4 ${isCheckingOllama ? 'animate-spin' : ''}`} />}
+                    disabled={isCheckingOllama}
+                  >
+                    Refresh
+                  </Button>
+                </div>
+                <div className={`p-4 rounded-lg ${ollamaStatus?.available ? 'bg-[var(--color-success-50)]' : 'bg-[var(--color-error-50)]'}`}>
+                  {ollamaStatus?.available ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-[var(--color-success-700)]">
+                        ✓ Connected to local Ollama instance
+                      </p>
+                      <p className="text-sm text-[var(--color-neutral-700)]">
+                        Available models: {ollamaStatus.models.join(', ') || 'Checking...'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-sm text-[var(--color-error-700)]">
+                        ✗ Ollama not running
+                      </p>
+                      <p className="text-xs text-[var(--color-neutral-600)]">
+                        Run <code className="bg-white px-1 py-0.5 rounded">ollama serve</code> to enable AI chat
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ML Engine Status */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-[var(--color-success-500)]" />
+                  <span className="font-medium">ML Recommendation Engine</span>
+                </div>
+                <div className="p-4 rounded-lg bg-[var(--color-success-50)]">
+                  <p className="text-sm text-[var(--color-success-700)]">
+                    ✓ Active and processing recommendations
+                  </p>
+                  <p className="text-sm text-[var(--color-neutral-700)] mt-2">
+                    Using: Skill matching, Interest alignment, Location scoring
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 p-4 bg-[var(--color-primary-50)] rounded-lg border border-[var(--color-primary-200)]">
+              <div className="flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-[var(--color-primary-600)] mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-[var(--color-primary-700)]">Hybrid AI System</h4>
+                  <p className="text-sm text-[var(--color-neutral-700)] mt-1">
+                    JobRasa uses a combination of ML-based matching algorithms for accurate recommendations 
+                    and Llama-powered conversational AI for interactive user experiences. The ML engine 
+                    works independently, while the chat features require Ollama to be running locally.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 

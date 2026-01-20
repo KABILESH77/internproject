@@ -46,11 +46,11 @@ export function HelpPage({ copyVariant }: HelpPageProps) {
   const faqs: FAQItem[] = [
     {
       question: 'Do I need to create an account?',
-      answer: 'No! VibeMatch works without requiring an account. Your profile is stored locally on your device. You can browse as a guest anytime.'
+      answer: 'No! JobRasa works without requiring an account. Your profile is stored locally on your device. You can browse as a guest anytime.'
     },
     {
       question: 'Are all internships really beginner-friendly?',
-      answer: 'Most positions on VibeMatch welcome beginners, but not all. Look for the "Beginner Friendly" badge to find internships that don\'t require prior experience.'
+      answer: 'Most positions on JobRasa welcome beginners, but not all. Look for the "Beginner Friendly" badge to find internships that don\'t require prior experience.'
     },
     {
       question: 'How does the matching algorithm work?',
@@ -61,7 +61,7 @@ export function HelpPage({ copyVariant }: HelpPageProps) {
       answer: 'Yes! Each internship has an "Apply" button that takes you to the official application. We don\'t store your personal information.'
     },
     {
-      question: 'Is VibeMatch really free?',
+      question: 'Is JobRasa really free?',
       answer: 'Yes, completely free for students. No hidden fees, no premium tiers. Our mission is to make government internships accessible to everyone.'
     },
     {

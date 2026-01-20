@@ -94,7 +94,7 @@ export const microcopy: Record<string, Microcopy> = {
 
   // Help & Tutorial
   helpTitle: {
-    default: 'How to Use VibeMatch',
+    default: 'How to Use JobRasa',
     simple: 'How This Works'
   },
   tutorialStep1: {

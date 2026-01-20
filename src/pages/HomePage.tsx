@@ -81,7 +81,7 @@ export function HomePage({
       {/* Features Section */}
       <section className="py-16 bg-white">
         <div className="container">
-          <h2 className="text-center mb-12">Why Students Love VibeMatch</h2>
+          <h2 className="text-center mb-12">Why Students Love JobRasa</h2>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="text-center p-6">
