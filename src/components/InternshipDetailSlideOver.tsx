@@ -1,8 +1,17 @@
 import React, { useEffect } from 'react';
-import { X, MapPin, Clock, ExternalLink, Bookmark, Award } from 'lucide-react';
+import { X, MapPin, Clock, ExternalLink, Bookmark, Award, Building2, GraduationCap, Gift, Calendar, Users, Lightbulb, Briefcase, Star, CheckCircle, AlertCircle } from 'lucide-react';
 import { Badge } from './Badge';
 import { Button } from './Button';
 import { Internship } from './InternshipCard';
+
+export interface SkillMatchInfo {
+  matchedSkills: string[];
+  missingSkills: string[];
+  overallScore: number;
+  skillScore: number;
+  experienceScore: number;
+  keywordScore: number;
+}
 
 interface InternshipDetailSlideOverProps {
   internship: Internship | null;
@@ -11,6 +20,7 @@ interface InternshipDetailSlideOverProps {
   onApply?: (id: string) => void;
   onSave?: (id: string) => void;
   isSaved?: boolean;
+  matchInfo?: SkillMatchInfo | null;
 }
 
 export function InternshipDetailSlideOver({
@@ -19,7 +29,8 @@ export function InternshipDetailSlideOver({
   onClose,
   onApply,
   onSave,
-  isSaved = false
+  isSaved = false,
+  matchInfo = null
 }: InternshipDetailSlideOverProps) {
   useEffect(() => {
     if (isOpen) {
@@ -130,6 +141,73 @@ export function InternshipDetailSlideOver({
             </ul>
           </div>
 
+          {/* ML Match Score Section */}
+          {matchInfo && (
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-200">
+              <h3 className="font-semibold mb-4 flex items-center gap-2 text-purple-800">
+                <Star className="w-5 h-5 text-purple-600" />
+                AI Match Analysis ({matchInfo.overallScore}% Match)
+              </h3>
+              
+              {/* Score Breakdown */}
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="text-center p-2 bg-white rounded-lg shadow-sm">
+                  <div className="text-xl font-bold text-purple-600">{matchInfo.skillScore}%</div>
+                  <div className="text-xs text-gray-600">Skills</div>
+                </div>
+                <div className="text-center p-2 bg-white rounded-lg shadow-sm">
+                  <div className="text-xl font-bold text-blue-600">{matchInfo.experienceScore}%</div>
+                  <div className="text-xs text-gray-600">Experience</div>
+                </div>
+                <div className="text-center p-2 bg-white rounded-lg shadow-sm">
+                  <div className="text-xl font-bold text-teal-600">{matchInfo.keywordScore}%</div>
+                  <div className="text-xs text-gray-600">Keywords</div>
+                </div>
+              </div>
+              
+              {/* Matched Skills */}
+              {matchInfo.matchedSkills.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold text-green-700 flex items-center gap-1 mb-2">
+                    <CheckCircle className="w-4 h-4" /> Skills You Have ({matchInfo.matchedSkills.length})
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {matchInfo.matchedSkills.map((skill, index) => (
+                      <span 
+                        key={index}
+                        className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium border border-green-300"
+                      >
+                        ✓ {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Missing Skills */}
+              {matchInfo.missingSkills.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-semibold text-orange-700 flex items-center gap-1 mb-2">
+                    <AlertCircle className="w-4 h-4" /> Skills to Develop ({matchInfo.missingSkills.length})
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {matchInfo.missingSkills.map((skill, index) => (
+                      <span 
+                        key={index}
+                        className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium border border-orange-300"
+                      >
+                        ○ {skill}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-xs text-orange-600 mt-2 italic">
+                    💡 These are great skills to learn for this role!
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Description */}
           {internship.description && (
             <div>
@@ -169,6 +247,150 @@ export function InternshipDetailSlideOver({
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {/* About the Company */}
+          {internship.aboutCompany && (
+            <div className="bg-[var(--color-neutral-50)] rounded-xl p-4">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-[var(--color-primary-600)]" />
+                About {internship.organization}
+              </h3>
+              <p className="text-[var(--color-neutral-700)] leading-relaxed">
+                {internship.aboutCompany}
+              </p>
+            </div>
+          )}
+
+          {/* What You'll Learn */}
+          {internship.whatYoullLearn && internship.whatYoullLearn.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <GraduationCap className="w-5 h-5 text-[var(--color-primary-600)]" />
+                What You'll Learn
+              </h3>
+              <ul className="space-y-2">
+                {internship.whatYoullLearn.map((item, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">✓</span>
+                    <span className="text-[var(--color-neutral-700)]">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Skills You'll Gain */}
+          {internship.skillsYoullGain && internship.skillsYoullGain.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Star className="w-5 h-5 text-[var(--color-primary-600)]" />
+                Skills You'll Gain
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {internship.skillsYoullGain.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-[var(--color-primary-100)] text-[var(--color-primary-800)] rounded-full text-sm font-medium"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Project Examples */}
+          {internship.projectExamples && internship.projectExamples.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-[var(--color-primary-600)]" />
+                Example Projects
+              </h3>
+              <ul className="space-y-2">
+                {internship.projectExamples.map((project, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <span className="text-[var(--color-primary-600)] mt-1">→</span>
+                    <span className="text-[var(--color-neutral-700)]">{project}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Benefits */}
+          {internship.benefits && internship.benefits.length > 0 && (
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Gift className="w-5 h-5 text-green-600" />
+                Benefits & Perks
+              </h3>
+              <ul className="space-y-2">
+                {internship.benefits.map((benefit, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <span className="text-green-600 mt-1">★</span>
+                    <span className="text-[var(--color-neutral-700)]">{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Additional Details Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {internship.workSchedule && (
+              <div className="bg-[var(--color-neutral-50)] rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock className="w-4 h-4 text-[var(--color-primary-600)]" />
+                  <span className="text-sm font-medium text-[var(--color-neutral-600)]">Work Schedule</span>
+                </div>
+                <p className="text-[var(--color-neutral-800)]">{internship.workSchedule}</p>
+              </div>
+            )}
+            {internship.teamSize && (
+              <div className="bg-[var(--color-neutral-50)] rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Users className="w-4 h-4 text-[var(--color-primary-600)]" />
+                  <span className="text-sm font-medium text-[var(--color-neutral-600)]">Team Size</span>
+                </div>
+                <p className="text-[var(--color-neutral-800)]">{internship.teamSize}</p>
+              </div>
+            )}
+            {internship.applicationDeadline && (
+              <div className="bg-[var(--color-neutral-50)] rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Calendar className="w-4 h-4 text-[var(--color-primary-600)]" />
+                  <span className="text-sm font-medium text-[var(--color-neutral-600)]">Application Deadline</span>
+                </div>
+                <p className="text-[var(--color-neutral-800)]">{internship.applicationDeadline}</p>
+              </div>
+            )}
+            {internship.mentorship && (
+              <div className="bg-[var(--color-neutral-50)] rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Lightbulb className="w-4 h-4 text-[var(--color-primary-600)]" />
+                  <span className="text-sm font-medium text-[var(--color-neutral-600)]">Mentorship</span>
+                </div>
+                <p className="text-[var(--color-neutral-800)]">{internship.mentorship}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Keywords/Skills Tags */}
+          {internship.keywords && internship.keywords.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-3">Related Skills & Technologies</h3>
+              <div className="flex flex-wrap gap-2">
+                {internship.keywords.map((keyword, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-1 bg-[var(--color-neutral-100)] text-[var(--color-neutral-700)] rounded text-sm"
+                  >
+                    {keyword}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>

@@ -12,6 +12,11 @@ import { ScoredInternship } from './recommendationEngine';
 const OLLAMA_BASE_URL = 'http://localhost:11434';
 const DEFAULT_MODEL = 'llama3.2'; // Can also use 'llama2', 'mistral', 'codellama', etc.
 
+// Cache to avoid repeated failed requests
+let ollamaAvailable: boolean | null = null;
+let lastCheckTime = 0;
+const CHECK_INTERVAL = 60000; // Only recheck every 60 seconds
+
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
@@ -37,23 +42,49 @@ export interface ConversationContext {
 
 /**
  * Check if Ollama is running and accessible
+ * Silently returns unavailable status without console errors
+ * Caches result to avoid repeated failed network requests
  */
 export async function checkOllamaHealth(): Promise<{ available: boolean; models: string[] }> {
+  const now = Date.now();
+  
+  // Return cached result if we checked recently
+  if (ollamaAvailable !== null && (now - lastCheckTime) < CHECK_INTERVAL) {
+    return { available: ollamaAvailable, models: [] };
+  }
+  
+  // If we know it's unavailable and checked within interval, don't retry
+  if (ollamaAvailable === false && (now - lastCheckTime) < CHECK_INTERVAL) {
+    return { available: false, models: [] };
+  }
+  
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+    
     const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`, {
       method: 'GET',
+      signal: controller.signal,
     });
     
+    clearTimeout(timeoutId);
+    
     if (!response.ok) {
+      ollamaAvailable = false;
+      lastCheckTime = now;
       return { available: false, models: [] };
     }
     
     const data = await response.json();
     const models = data.models?.map((m: { name: string }) => m.name) || [];
     
+    ollamaAvailable = true;
+    lastCheckTime = now;
     return { available: true, models };
-  } catch (error) {
-    console.warn('Ollama not available:', error);
+  } catch {
+    // Silently return unavailable - this is expected when Ollama isn't installed
+    ollamaAvailable = false;
+    lastCheckTime = now;
     return { available: false, models: [] };
   }
 }
@@ -188,9 +219,9 @@ export async function sendChatMessage(
       const data: OllamaResponse = await response.json();
       return data.message?.content || 'I apologize, but I couldn\'t generate a response.';
     }
-  } catch (error) {
-    console.error('Error communicating with Ollama:', error);
-    throw error;
+  } catch {
+    // Silently fail - caller will handle with fallback
+    throw new Error('Ollama communication failed');
   }
 }
 

@@ -58,19 +58,8 @@ export function AIChatAssistant({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Check Ollama health on mount
-  useEffect(() => {
-    const checkHealth = async () => {
-      const health = await checkOllamaHealth();
-      setOllamaAvailable(health.available);
-      
-      if (!health.available) {
-        console.log('Ollama not available, using fallback mode');
-      }
-    };
-    
-    checkHealth();
-  }, []);
+  // Don't check Ollama on mount - only when user sends first message
+  // This prevents network errors from appearing in console
 
   // Initialize with welcome message
   useEffect(() => {
@@ -148,9 +137,9 @@ export function AIChatAssistant({
       
       setMessages(prev => [...prev, assistantMessage]);
       setStreamingMessage('');
-    } catch (err) {
-      console.error('Chat error:', err);
-      setError('Unable to get response. Using fallback mode.');
+    } catch {
+      // Silently use fallback - don't show error in console
+      setError('Using smart fallback mode.');
       
       // Fallback response
       const fallbackResponse = getFallbackResponse(userMessage.content, getContext());

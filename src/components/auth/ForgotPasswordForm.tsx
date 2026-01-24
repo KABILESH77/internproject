@@ -1,6 +1,6 @@
 /**
  * Forgot Password Form Component
- * Request password reset email
+ * Request password reset email - White/Red theme
  */
 
 import React, { useState } from 'react';
@@ -39,10 +39,10 @@ export function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps)
 
   if (!isConfigured) {
     return (
-      <div className="p-6 text-center">
-        <AlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
-        <h3 className="text-white font-semibold mb-2">Supabase Not Configured</h3>
-        <p className="text-white/70 text-sm">
+      <div className="p-6 text-center bg-amber-50 rounded-xl border border-amber-200">
+        <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <h3 className="text-gray-800 font-semibold mb-2">Supabase Not Configured</h3>
+        <p className="text-gray-600 text-sm">
           Please add your Supabase credentials to the .env file.
         </p>
       </div>
@@ -52,15 +52,15 @@ export function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps)
   if (success) {
     return (
       <div className="p-6 text-center">
-        <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-        <h3 className="text-white text-xl font-semibold mb-2">Check Your Email!</h3>
-        <p className="text-white/70 mb-6">
-          We've sent a password reset link to <strong className="text-white">{email}</strong>.
+        <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+        <h3 className="text-gray-800 text-xl font-semibold mb-2">Check Your Email!</h3>
+        <p className="text-gray-600 mb-6">
+          We've sent a password reset link to <strong className="text-gray-800">{email}</strong>.
           Click the link in the email to reset your password.
         </p>
         <button
           onClick={onSwitchToLogin}
-          className="px-6 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors flex items-center gap-2 mx-auto"
+          className="px-6 py-2.5 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium transition-colors flex items-center gap-2 mx-auto"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Login
@@ -73,45 +73,43 @@ export function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps)
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Header */}
       <div className="text-center mb-6">
-        <h3 className="text-white text-xl font-semibold mb-2">Forgot Password?</h3>
-        <p className="text-white/70 text-sm">
-          No worries! Enter your email and we'll send you a reset link.
-        </p>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Reset Password</h2>
+        <p className="text-gray-500 text-sm">Enter your email to receive a reset link</p>
       </div>
 
       {/* Error Display */}
       {displayError && (
-        <div className="p-3 rounded-xl bg-red-500/20 border border-red-500/50 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-          <p className="text-red-200 text-sm">{displayError}</p>
+        <div className="p-3 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+          <p className="text-red-600 text-sm">{displayError}</p>
         </div>
       )}
 
       {/* Email Field */}
-      <div>
-        <label htmlFor="reset-email" className="block text-white/80 text-sm font-medium mb-2">
+      <div className="space-y-1">
+        <label htmlFor="reset-email" className="block text-gray-700 text-sm font-medium">
           Email Address
         </label>
-        <div className="relative">
-          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-          <input
-            id="reset-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#0a7676] focus:border-transparent transition-all"
-            disabled={loading}
-            autoFocus
-          />
-        </div>
+        <input
+          id="reset-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full px-4 py-3 rounded-xl bg-white border-2 border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all shadow-sm"
+          disabled={loading}
+          autoFocus
+        />
       </div>
 
       {/* Submit Button */}
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#0a7676] to-[#0d9494] text-white font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+        className="w-full py-3.5 px-4 rounded-xl text-white font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg"
+        style={{
+          background: 'linear-gradient(135deg, #DC3545 0%, #C82333 100%)',
+          boxShadow: '0 4px 15px rgba(220, 53, 69, 0.4)',
+        }}
       >
         {loading ? (
           <>
@@ -127,7 +125,7 @@ export function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps)
       <button
         type="button"
         onClick={onSwitchToLogin}
-        className="w-full py-2 text-white/70 hover:text-white text-sm flex items-center justify-center gap-2 transition-colors"
+        className="w-full py-2 text-gray-500 hover:text-gray-700 text-sm flex items-center justify-center gap-2 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Login

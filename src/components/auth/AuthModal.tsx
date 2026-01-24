@@ -1,10 +1,10 @@
 /**
  * Auth Modal Component
- * Glassmorphic modal containing all auth forms
+ * Clean white modal with red accent colors
  */
 
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Briefcase } from 'lucide-react';
 import { LoginForm } from './LoginForm';
 import { SignUpForm } from './SignUpForm';
 import { ForgotPasswordForm } from './ForgotPasswordForm';
@@ -75,39 +75,80 @@ export function AuthModal({ isOpen, onClose, initialView = 'login', onAuthSucces
     }
   };
 
+  const getSubtitle = () => {
+    switch (currentView) {
+      case 'login':
+        return 'Sign in to access your personalized internships';
+      case 'signup':
+        return 'Join JobRasa to find your dream internship';
+      case 'forgot-password':
+        return "We'll send you a reset link";
+      case 'reset-password':
+        return 'Create a new secure password';
+      default:
+        return '';
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/70 backdrop-blur-md"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl"
+        className="relative w-full max-w-[440px] max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl"
         style={{
-          background: 'linear-gradient(135deg, rgba(10, 118, 118, 0.15) 0%, rgba(13, 148, 148, 0.1) 50%, rgba(10, 118, 118, 0.15) 100%)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
+          background: 'linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%)',
+          boxShadow: '0 25px 80px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(220, 53, 69, 0.15)',
         }}
       >
+        {/* Red accent bar at top */}
+        <div 
+          className="h-1.5 w-full rounded-t-3xl"
+          style={{
+            background: 'linear-gradient(90deg, #DC3545 0%, #E85D6C 50%, #DC3545 100%)',
+          }}
+        />
+
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all z-10"
+          aria-label="Close modal"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/10">
-          <h2 className="text-2xl font-bold text-white">{getTitle()}</h2>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-colors"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
+        <div className="px-8 pt-8 pb-4 text-center">
+          {/* Logo */}
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <div 
+              className="p-2.5 rounded-xl"
+              style={{
+                background: 'linear-gradient(135deg, #DC3545 0%, #C82333 100%)',
+                boxShadow: '0 4px 15px rgba(220, 53, 69, 0.4)',
+              }}
+            >
+              <Briefcase size={24} color="white" />
+            </div>
+            <span className="text-2xl font-bold text-gray-800">JobRasa</span>
+          </div>
+
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            {getTitle()}
+          </h2>
+          <p className="text-gray-500 text-sm">
+            {getSubtitle()}
+          </p>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="px-8 pb-8">
           {currentView === 'login' && (
             <LoginForm
               onSwitchToSignUp={() => setCurrentView('signup')}
@@ -137,9 +178,12 @@ export function AuthModal({ isOpen, onClose, initialView = 'login', onAuthSucces
         </div>
 
         {/* Footer */}
-        <div className="px-6 pb-6">
-          <p className="text-center text-white/40 text-xs">
-            By continuing, you agree to our Terms of Service and Privacy Policy.
+        <div className="px-8 pb-6 pt-2 border-t border-gray-100">
+          <p className="text-center text-gray-400 text-xs">
+            By continuing, you agree to our{' '}
+            <a href="#" className="text-red-500 hover:underline">Terms of Service</a>
+            {' '}and{' '}
+            <a href="#" className="text-red-500 hover:underline">Privacy Policy</a>
           </p>
         </div>
       </div>

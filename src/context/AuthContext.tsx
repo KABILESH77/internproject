@@ -49,28 +49,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle(); // Use maybeSingle() instead of single() to avoid error when no row exists
 
       if (error) {
-        // Profile might not exist yet for new users
-        if (error.code === 'PGRST116') {
-          console.log('Profile not found, will be created on first update');
-          return null;
-        }
-        throw error;
+        console.error('Error fetching profile:', error);
+        return null;
       }
 
-      setProfile(data);
-      return data;
+      if (data) {
+        setProfile(data);
+        return data;
+      }
+
+      // Profile doesn't exist yet
+      console.log('Profile not found for user:', userId);
+      return null;
     } catch (err) {
       console.error('Error fetching profile:', err);
       return null;
     }
   }, []);
 
-  // Create profile for new user
+  // Create or update profile for user - ensures no duplicates
   const createProfile = useCallback(async (user: User, fullName?: string) => {
     try {
+      // First, check if profile already exists by user ID (primary key)
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (existingProfile) {
+        // Profile already exists, just update it with any new info from OAuth
+        const updates: Partial<Profile> = {
+          updated_at: new Date().toISOString(),
+        };
+        
+        // Only update fields that are empty in existing profile
+        if (!existingProfile.full_name && (fullName || user.user_metadata?.full_name)) {
+          updates.full_name = fullName || user.user_metadata?.full_name;
+        }
+        if (!existingProfile.avatar_url && user.user_metadata?.avatar_url) {
+          updates.avatar_url = user.user_metadata?.avatar_url;
+        }
+        if (!existingProfile.email && user.email) {
+          updates.email = user.email;
+        }
+
+        // Only update if there are changes
+        if (Object.keys(updates).length > 1) { // more than just updated_at
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update(updates)
+            .eq('id', user.id);
+
+          if (updateError) {
+            console.error('Error updating existing profile:', updateError);
+          }
+        }
+
+        // Refresh the profile
+        const refreshed = await fetchProfile(user.id);
+        return refreshed || existingProfile;
+      }
+
+      // Create new profile for first-time user
       const newProfile: Partial<Profile> = {
         id: user.id,
         email: user.email,
@@ -80,22 +124,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         skills: [],
         interests: [],
         location: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
 
       const { data, error } = await supabase
         .from('profiles')
-        .upsert(newProfile)
+        .insert(newProfile)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Handle race condition - profile might have been created by another request
+        if (error.code === '23505') { // Unique violation
+          console.log('Profile already exists (race condition), fetching...');
+          return await fetchProfile(user.id);
+        }
+        throw error;
+      }
+      
       setProfile(data);
       return data;
     } catch (err) {
       console.error('Error creating profile:', err);
-      return null;
+      // Try to fetch existing profile as fallback
+      return await fetchProfile(user.id);
     }
-  }, []);
+  }, [fetchProfile]);
 
   // Initialize auth state
   useEffect(() => {
@@ -118,13 +173,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
+      
       setSession(session);
       setUser(session?.user ?? null);
 
       if (event === 'SIGNED_IN' && session?.user) {
+        // User signed in - fetch or create profile
         const existingProfile = await fetchProfile(session.user.id);
         if (!existingProfile) {
           await createProfile(session.user);
+        }
+      }
+
+      if (event === 'TOKEN_REFRESHED' && session?.user) {
+        // Token refreshed - ensure profile is loaded
+        if (!profile) {
+          await fetchProfile(session.user.id);
         }
       }
 
@@ -194,9 +259,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        // Remove 'prompt: consent' - this forces re-authorization every time
+        // and can cause user identity issues
         queryParams: {
           access_type: 'offline',
-          prompt: 'consent',
         },
       },
     });
@@ -210,9 +276,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Sign out
   const signOut = async () => {
-    setError(null);
-    await supabase.auth.signOut();
-    setProfile(null);
+    try {
+      setError(null);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+        setError(error.message);
+      }
+      // Clear local state regardless of error
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+    } catch (err) {
+      console.error('Sign out exception:', err);
+      // Force clear state even on error
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+    }
   };
 
   // Request password reset email

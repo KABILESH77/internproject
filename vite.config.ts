@@ -56,5 +56,9 @@
     server: {
       port: 3000,
       open: true,
+      // Handle SPA routing - redirect all routes to index.html
+      historyApiFallback: true,
     },
+    // Enable history fallback for dev server
+    appType: 'spa',
   });

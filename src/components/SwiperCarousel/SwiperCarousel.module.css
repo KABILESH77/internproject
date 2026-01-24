@@ -1,0 +1,137 @@
+/**
+ * Swiper Carousel Styles
+ * Customizations on top of Swiper's default styles
+ */
+
+.swiperContainer {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Maintain 16:9 aspect ratio */
+.swiperContainer::before {
+  content: '';
+  display: block;
+  padding-top: 56.25%;
+}
+
+@media (max-width: 768px) {
+  .swiperContainer::before {
+    padding-top: 75%;
+  }
+}
+
+.swiper {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.slide {
+  width: 100%;
+  height: 100%;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Custom navigation arrows */
+.swiperContainer :global(.swiper-button-prev),
+.swiperContainer :global(.swiper-button-next) {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.swiperContainer :global(.swiper-button-prev):hover,
+.swiperContainer :global(.swiper-button-next):hover {
+  background: #ffffff;
+  transform: scale(1.1);
+}
+
+.swiperContainer :global(.swiper-button-prev)::after,
+.swiperContainer :global(.swiper-button-next)::after {
+  font-size: 18px;
+  font-weight: bold;
+  color: #1a1a2e;
+}
+
+.swiperContainer :global(.swiper-button-disabled) {
+  opacity: 0.4;
+}
+
+/* Custom pagination dots */
+.swiperContainer :global(.swiper-pagination) {
+  bottom: 16px !important;
+}
+
+.swiperContainer :global(.swiper-pagination-bullet) {
+  width: 10px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  opacity: 1;
+  transition: all 0.2s ease;
+}
+
+.swiperContainer :global(.swiper-pagination-bullet-active) {
+  background: #ffffff;
+  transform: scale(1.2);
+}
+
+/* Focus styles for accessibility */
+.swiperContainer :global(.swiper-button-prev):focus-visible,
+.swiperContainer :global(.swiper-button-next):focus-visible,
+.swiperContainer :global(.swiper-pagination-bullet):focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Screen reader only */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .swiperContainer :global(.swiper-wrapper) {
+    transition: none !important;
+  }
+  
+  .swiperContainer :global(.swiper-button-prev),
+  .swiperContainer :global(.swiper-button-next),
+  .swiperContainer :global(.swiper-pagination-bullet) {
+    transition: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .swiperContainer :global(.swiper-button-prev),
+  .swiperContainer :global(.swiper-button-next) {
+    width: 40px;
+    height: 40px;
+  }
+
+  .swiperContainer :global(.swiper-button-prev)::after,
+  .swiperContainer :global(.swiper-button-next)::after {
+    font-size: 14px;
+  }
+}

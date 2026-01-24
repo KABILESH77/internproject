@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   Box,
   Flex,
@@ -56,26 +56,70 @@ import {
   LogOut,
   User,
   ChevronDown,
+  AlertCircle,
 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatedBackground } from './components/AnimatedBackground';
 import { AIChatAssistant, AIChatButton } from './components/AIChatAssistant';
-import { AuthModal, AuthView, ProtectedRoute } from './components/auth';
+import { ProtectedRoute } from './components/auth';
 import { useAuth } from './context/AuthContext';
 import { OnboardingData } from './components/OnboardingModal';
 import { mockInternships } from './data/mockInternships';
 import { getRecommendations, RecommendationWeights, ScoredInternship } from './services/recommendationEngine';
+import { ProfilePage } from './pages/ProfilePage';
+import { AuthPage } from './pages/AuthPage';
+import { MLRecommendationsPage } from './pages/MLRecommendationsPage';
+import { ROUTES, getPageFromPath, getPathForPage, PageType } from './router';
+import { Carousel, CarouselImage } from './components/Carousel';
+import { LogoSlider, Logo } from './components/LogoSlider';
+import { useMLRecommendations } from './hooks/useMLRecommendations';
 
-type PageType = 'home' | 'search' | 'recommendations' | 'saved' | 'help' | 'admin';
+// Hero carousel images for homepage
+const heroCarouselImages: CarouselImage[] = [
+  {
+    src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920&q=80',
+    alt: 'Students collaborating on a tech project in a modern office space',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=1920&q=80',
+    alt: 'Professional team working together in a bright workspace',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1920&q=80',
+    alt: 'Diverse group of interns celebrating project success',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1920&q=80',
+    alt: 'Young professionals networking at a career event',
+  },
+];
+
+// Company logos for the infinite slider
+const companyLogos: Logo[] = [
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg', alt: 'Google', href: 'https://careers.google.com' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg', alt: 'Apple', href: 'https://www.apple.com/careers' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoft/microsoft-original.svg', alt: 'Microsoft', href: 'https://careers.microsoft.com' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazon/amazon-original.svg', alt: 'Amazon', href: 'https://www.amazon.jobs' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg', alt: 'Meta', href: 'https://www.metacareers.com' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/twitter/twitter-original.svg', alt: 'Twitter/X', href: 'https://careers.twitter.com' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg', alt: 'LinkedIn', href: 'https://careers.linkedin.com' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/slack/slack-original.svg', alt: 'Slack', href: 'https://slack.com/careers' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spotify/spotify-original.svg', alt: 'Spotify', href: 'https://www.lifeatspotify.com' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/adobe/adobe-original.svg', alt: 'Adobe', href: 'https://www.adobe.com/careers' },
+];
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<PageType>('home');
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Derive current page from URL path
+  const currentPage = getPageFromPath(location.pathname);
+  
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { colorMode, toggleColorMode } = useColorMode();
   
   // Auth state
   const { user, profile, signOut, isConfigured } = useAuth();
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalView, setAuthModalView] = useState<AuthView>('login');
   
   // AI Chat state
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -112,6 +156,7 @@ function App() {
     );
   };
 
+  // Build navigation items - add Profile when logged in, Sign In when not logged in
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'search', label: 'Search', icon: Search },
@@ -119,12 +164,15 @@ function App() {
     { id: 'saved', label: 'Saved', icon: Heart },
     { id: 'help', label: 'Help', icon: HelpCircle },
     { id: 'admin', label: 'Admin', icon: Settings },
+    // Add Profile tab when user is logged in, Sign In when not logged in
+    ...(user ? [{ id: 'profile', label: 'Profile', icon: User }] : [{ id: 'auth', label: 'Sign In', icon: LogIn }]),
   ];
 
-  const handleNavClick = (page: PageType) => {
-    setCurrentPage(page);
+  // Navigate using router - updates URL
+  const handleNavClick = useCallback((page: PageType) => {
+    navigate(getPathForPage(page));
     onClose();
-  };
+  }, [navigate, onClose]);
 
   const glassBg = useColorModeValue(
     'rgba(255, 255, 255, 0.15)',
@@ -135,6 +183,17 @@ function App() {
     'rgba(255, 255, 255, 0.25)',
     'rgba(0, 0, 0, 0.4)'
   );
+
+  // If on auth page, render AuthPage instead of main layout
+  if (currentPage === 'auth') {
+    return (
+      <AuthPage
+        initialView="login"
+        onAuthSuccess={() => navigate(ROUTES.home)}
+        onBack={() => navigate(ROUTES.home)}
+      />
+    );
+  }
 
   return (
     <Box minH="100vh" position="relative">
@@ -163,7 +222,7 @@ function App() {
           border="1px solid rgba(255, 255, 255, 0.2)"
         >
           {/* Logo */}
-          <HStack spacing={3} cursor="pointer" onClick={() => setCurrentPage('home')}>
+          <HStack spacing={3} cursor="pointer" onClick={() => navigate(ROUTES.home)}>
             <Box
               bg="brand.500"
               borderRadius="xl"
@@ -246,41 +305,56 @@ function App() {
                       bg="brand.500"
                     />
                     <Text fontWeight="600" display={{ base: 'none', lg: 'block' }}>
-                      {profile?.full_name?.split(' ')[0] || 'User'}
+                      {profile?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'User'}
                     </Text>
                   </HStack>
                 </MenuButton>
                 <MenuList
-                  bg="rgba(10, 118, 118, 0.95)"
-                  backdropFilter="blur(20px)"
-                  border="1px solid rgba(255, 255, 255, 0.2)"
+                  bg="white"
+                  border="1px solid"
+                  borderColor="gray.200"
                   borderRadius="xl"
-                  boxShadow="0 25px 50px rgba(0, 0, 0, 0.3)"
+                  boxShadow="0 25px 50px rgba(0, 0, 0, 0.15)"
+                  py={2}
                 >
+                  {/* User Info Header */}
+                  <Box px={4} py={3} borderBottom="1px solid" borderColor="gray.100">
+                    <Text fontWeight="600" color="gray.800" fontSize="sm">
+                      {profile?.full_name || 'User'}
+                    </Text>
+                    <Text fontSize="xs" color="gray.500">
+                      {user.email}
+                    </Text>
+                  </Box>
                   <MenuItem 
                     icon={<User size={16} />}
+                    onClick={() => navigate(ROUTES.profile)}
                     bg="transparent"
-                    _hover={{ bg: 'whiteAlpha.200' }}
-                    color="white"
+                    _hover={{ bg: 'gray.100' }}
+                    color="gray.700"
                   >
                     Profile
                   </MenuItem>
                   <MenuItem 
                     icon={<Heart size={16} />}
-                    onClick={() => setCurrentPage('saved')}
+                    onClick={() => navigate(ROUTES.saved)}
                     bg="transparent"
-                    _hover={{ bg: 'whiteAlpha.200' }}
-                    color="white"
+                    _hover={{ bg: 'gray.100' }}
+                    color="gray.700"
                   >
                     Saved Internships
                   </MenuItem>
-                  <MenuDivider borderColor="whiteAlpha.200" />
+                  <MenuDivider borderColor="gray.200" />
                   <MenuItem 
                     icon={<LogOut size={16} />}
-                    onClick={signOut}
+                    onClick={async () => {
+                      await signOut();
+                      navigate(ROUTES.home);
+                    }}
                     bg="transparent"
-                    _hover={{ bg: 'whiteAlpha.200' }}
-                    color="white"
+                    _hover={{ bg: 'red.50' }}
+                    color="red.500"
+                    fontWeight="500"
                   >
                     Sign Out
                   </MenuItem>
@@ -289,10 +363,7 @@ function App() {
             ) : (
               <Button
                 leftIcon={<LogIn size={18} />}
-                onClick={() => {
-                  setAuthModalView('login');
-                  setIsAuthModalOpen(true);
-                }}
+                onClick={() => navigate(ROUTES.auth)}
                 bg="brand.500"
                 color="white"
                 _hover={{ bg: 'brand.600' }}
@@ -384,29 +455,46 @@ function App() {
               
               {/* Mobile auth button */}
               {user ? (
-                <Button
-                  leftIcon={<LogOut size={20} />}
-                  onClick={() => {
-                    signOut();
-                    onClose();
-                  }}
-                  bg="whiteAlpha.100"
-                  color="white"
-                  _hover={{ bg: 'whiteAlpha.200' }}
-                  justifyContent="flex-start"
-                  borderRadius="xl"
-                  py={6}
-                  mt={4}
-                >
-                  Sign Out
-                </Button>
+                <>
+                  <Button
+                    leftIcon={<User size={20} />}
+                    onClick={() => {
+                      handleNavClick('profile');
+                    }}
+                    bg={currentPage === 'profile' ? 'whiteAlpha.200' : 'transparent'}
+                    color="white"
+                    _hover={{ bg: 'whiteAlpha.300' }}
+                    justifyContent="flex-start"
+                    fontWeight={currentPage === 'profile' ? '700' : '500'}
+                    borderRadius="xl"
+                    py={6}
+                    mt={4}
+                  >
+                    My Profile
+                  </Button>
+                  <Button
+                    leftIcon={<LogOut size={20} />}
+                    onClick={async () => {
+                      await signOut();
+                      onClose();
+                      navigate(ROUTES.home);
+                    }}
+                    bg="red.500"
+                    color="white"
+                    _hover={{ bg: 'red.600' }}
+                    justifyContent="flex-start"
+                    borderRadius="xl"
+                    py={6}
+                  >
+                    Sign Out
+                  </Button>
+                </>
               ) : (
                 <Button
                   leftIcon={<LogIn size={20} />}
                   onClick={() => {
                     onClose();
-                    setAuthModalView('login');
-                    setIsAuthModalOpen(true);
+                    navigate(ROUTES.auth);
                   }}
                   bg="brand.600"
                   color="white"
@@ -427,30 +515,25 @@ function App() {
       {/* Main Content */}
       <Box pt="100px" pb={8}>
         <Container maxW="7xl">
-          {currentPage === 'home' && <HomePage onNavigate={setCurrentPage} />}
+          {currentPage === 'home' && <HomePage onNavigate={handleNavClick} />}
           {currentPage === 'search' && <SearchPage />}
           {currentPage === 'recommendations' && (
-            <ProtectedRoute onLoginClick={() => {
-              setAuthModalView('login');
-              setIsAuthModalOpen(true);
-            }}>
-              <RecommendationsPage 
+            <ProtectedRoute onLoginClick={() => navigate(ROUTES.auth)}>
+              <MLRecommendationsPage 
                 onSaveInternship={handleSaveInternship}
                 savedInternshipIds={savedInternshipIds}
-                userProfile={userProfile}
-                weights={weights}
               />
             </ProtectedRoute>
           )}
           {currentPage === 'saved' && (
-            <ProtectedRoute onLoginClick={() => {
-              setAuthModalView('login');
-              setIsAuthModalOpen(true);
-            }}>
+            <ProtectedRoute onLoginClick={() => navigate(ROUTES.auth)}>
               <SavedPage />
             </ProtectedRoute>
           )}
           {currentPage === 'help' && <HelpPage />}
+          {currentPage === 'profile' && (
+            <ProfilePage onBack={() => navigate(ROUTES.home)} />
+          )}
           {currentPage === 'admin' && (
             <AdminPage 
               weights={weights}
@@ -473,26 +556,111 @@ function App() {
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
       />
-      
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        initialView={authModalView}
-        onAuthSuccess={() => {
-          setIsAuthModalOpen(false);
-          // Optionally navigate to recommendations after login
-          setCurrentPage('recommendations');
-        }}
-      />
     </Box>
   );
 }
 
 // HomePage Component
 function HomePage({ onNavigate }: { onNavigate: (page: PageType) => void }) {
+  const [profileCompletion, setProfileCompletion] = React.useState<{ percentage: number; isComplete: boolean } | null>(null);
+
+  // Check profile completion status
+  React.useEffect(() => {
+    const checkProfileCompletion = () => {
+      const saved = localStorage.getItem('jobrasa-profile-completion');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          setProfileCompletion(data);
+        } catch (e) {
+          console.error('Failed to parse profile completion');
+        }
+      }
+    };
+    
+    checkProfileCompletion();
+    
+    // Check periodically for updates
+    const interval = setInterval(checkProfileCompletion, 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <VStack spacing={12} py={8}>
+      {/* Profile Incomplete Notification */}
+      {profileCompletion && !profileCompletion.isComplete && (
+        <Box
+          w="full"
+          maxW="800px"
+          mx="auto"
+          bg="red.50"
+          border="1px solid"
+          borderColor="red.200"
+          borderRadius="xl"
+          px={6}
+          py={4}
+          boxShadow="0 4px 12px rgba(239, 68, 68, 0.1)"
+        >
+          <Flex align="center" justify="space-between" gap={4} flexWrap="wrap">
+            <Flex align="center" gap={3}>
+              <Box color="red.500" flexShrink={0}>
+                <AlertCircle size={20} />
+              </Box>
+              <Text color="red.700" fontSize="sm" fontWeight="500">
+                Your profile is only <Text as="span" fontWeight="bold">{profileCompletion.percentage}%</Text> complete. 
+                Complete your profile to get better internship recommendations!
+              </Text>
+            </Flex>
+            <Button
+              size="sm"
+              colorScheme="red"
+              variant="ghost"
+              onClick={() => onNavigate('profile')}
+              rightIcon={<ArrowRight size={16} />}
+              _hover={{ bg: 'red.100' }}
+            >
+              Complete Profile
+            </Button>
+          </Flex>
+        </Box>
+      )}
+
+      {/* Trusted Companies Logo Slider */}
+      <Box w="full" mb={6}>
+        <Text 
+          textAlign="center" 
+          fontSize="sm" 
+          color="whiteAlpha.700" 
+          mb={4}
+          textTransform="uppercase"
+          letterSpacing="wider"
+          fontWeight="600"
+        >
+          Trusted by top companies worldwide
+        </Text>
+        <Box
+          sx={{
+            position: 'relative',
+            width: '100vw',
+            marginLeft: 'calc(-50vw + 50%)',
+            marginRight: 'calc(-50vw + 50%)',
+            '--fade-color': 'transparent',
+          }}
+        >
+          <LogoSlider
+            logos={companyLogos}
+            speed={25}
+            logoHeight={40}
+            gap={80}
+            direction="left"
+            pauseOnHover={true}
+            showFade={false}
+            ariaLabel="Companies that trust JobRasa"
+          />
+        </Box>
+      </Box>
+
       {/* Hero Section */}
       <VStack spacing={6} textAlign="center" maxW="800px" mx="auto">
         <Badge
@@ -562,6 +730,35 @@ function HomePage({ onNavigate }: { onNavigate: (page: PageType) => void }) {
           </Button>
         </HStack>
       </VStack>
+
+      {/* Hero Image Carousel */}
+      <Box 
+        position="absolute"
+        left="0"
+        right="0"
+        w="100vw"
+        maxW="100vw"
+        overflow="hidden" 
+        boxShadow="xl"
+        sx={{
+          position: 'relative',
+          width: '100vw',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginRight: 'calc(-50vw + 50%)',
+        }}
+      >
+        <Carousel
+          images={heroCarouselImages}
+          autoplay={true}
+          interval={5000}
+          pauseOnHover={true}
+          showDots={true}
+          showArrows={true}
+          loop={true}
+          transitionType="fade"
+          height={700}
+        />
+      </Box>
 
       {/* Feature Cards */}
       <Flex
@@ -756,11 +953,13 @@ function InternshipCardChakra({
   isSaved = false,
   onSave,
   onApply,
+  onViewDetails,
 }: {
   internship: InternshipData | ScoredInternship;
   isSaved?: boolean;
   onSave?: (id: string) => void;
   onApply?: (id: string) => void;
+  onViewDetails?: (internship: InternshipData | ScoredInternship) => void;
 }) {
   return (
     <Box
@@ -858,6 +1057,7 @@ function InternshipCardChakra({
           _hover={{ bg: 'whiteAlpha.200' }}
           borderRadius="full"
           fontWeight="500"
+          onClick={() => onViewDetails?.(internship)}
         >
           Details
         </Button>
@@ -866,10 +1066,366 @@ function InternshipCardChakra({
   );
 }
 
+// Define SkillMatchInfo interface for ML match display
+interface SkillMatchInfo {
+  matchedSkills: string[];
+  missingSkills: string[];
+  overallScore: number;
+  skillScore: number;
+  experienceScore: number;
+  keywordScore: number;
+}
+
+// Internship Detail Drawer Component
+function InternshipDetailDrawer({
+  internship,
+  isOpen,
+  onClose,
+  isSaved,
+  onSave,
+  matchInfo,
+}: {
+  internship: InternshipData | ScoredInternship | null;
+  isOpen: boolean;
+  onClose: () => void;
+  isSaved: boolean;
+  onSave?: (id: string) => void;
+  matchInfo?: SkillMatchInfo | null;
+}) {
+  if (!internship) return null;
+
+  // Find the full internship data from mockInternships
+  const fullInternship = mockInternships.find(i => i.id === internship.id);
+
+  return (
+    <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="lg">
+      <DrawerOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+      <DrawerContent bg="gray.900" color="white">
+        <DrawerCloseButton color="white" />
+        <DrawerHeader borderBottomWidth="1px" borderColor="whiteAlpha.200">
+          <VStack align="start" spacing={1}>
+            <Heading size="lg">{internship.title}</Heading>
+            <Text color="whiteAlpha.800" fontSize="md" fontWeight="normal">
+              {internship.organization}
+            </Text>
+          </VStack>
+        </DrawerHeader>
+
+        <DrawerBody py={6}>
+          <VStack spacing={6} align="stretch">
+            {/* Badges */}
+            <Flex wrap="wrap" gap={2}>
+              {internship.isBeginner && (
+                <Badge bg="green.500" color="white" px={3} py={1} borderRadius="full">
+                  ✓ Beginner Friendly
+                </Badge>
+              )}
+              {internship.isRemote && (
+                <Badge bg="blue.500" color="white" px={3} py={1} borderRadius="full">
+                  🏠 Remote
+                </Badge>
+              )}
+              {internship.stipend && (
+                <Badge bg="accent.500" color="white" px={3} py={1} borderRadius="full">
+                  💰 {internship.stipend}
+                </Badge>
+              )}
+              {'matchScore' in internship && (
+                <Badge bg="purple.500" color="white" px={3} py={1} borderRadius="full">
+                  🎯 {(internship as ScoredInternship).matchScore}% AI Match
+                </Badge>
+              )}
+            </Flex>
+
+            {/* ML Match Analysis Section */}
+            {matchInfo && (
+              <Box bg="linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)" 
+                   p={5} borderRadius="xl" border="1px solid" borderColor="purple.500">
+                <HStack mb={4}>
+                  <Sparkles size={20} color="#a855f7" />
+                  <Heading size="sm" color="purple.300">
+                    AI Match Analysis ({matchInfo.overallScore}% Match)
+                  </Heading>
+                </HStack>
+                
+                {/* Score Breakdown */}
+                <Flex gap={3} mb={4} wrap="wrap">
+                  <Box textAlign="center" p={3} bg="whiteAlpha.100" borderRadius="lg" flex="1" minW="80px">
+                    <Text fontSize="xl" fontWeight="bold" color="purple.300">{matchInfo.skillScore}%</Text>
+                    <Text fontSize="xs" color="whiteAlpha.700">Skills</Text>
+                  </Box>
+                  <Box textAlign="center" p={3} bg="whiteAlpha.100" borderRadius="lg" flex="1" minW="80px">
+                    <Text fontSize="xl" fontWeight="bold" color="blue.300">{matchInfo.experienceScore}%</Text>
+                    <Text fontSize="xs" color="whiteAlpha.700">Experience</Text>
+                  </Box>
+                  <Box textAlign="center" p={3} bg="whiteAlpha.100" borderRadius="lg" flex="1" minW="80px">
+                    <Text fontSize="xl" fontWeight="bold" color="teal.300">{matchInfo.keywordScore}%</Text>
+                    <Text fontSize="xs" color="whiteAlpha.700">Keywords</Text>
+                  </Box>
+                </Flex>
+                
+                {/* Matched Skills */}
+                {matchInfo.matchedSkills.length > 0 && (
+                  <Box mb={4}>
+                    <HStack mb={2}>
+                      <Box color="green.400">✓</Box>
+                      <Text fontSize="sm" fontWeight="600" color="green.300">
+                        Skills You Have ({matchInfo.matchedSkills.length})
+                      </Text>
+                    </HStack>
+                    <Flex wrap="wrap" gap={2}>
+                      {matchInfo.matchedSkills.map((skill, index) => (
+                        <Badge key={index} bg="green.600" color="white" px={2} py={1} borderRadius="full" fontSize="xs">
+                          ✓ {skill}
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </Box>
+                )}
+                
+                {/* Missing Skills */}
+                {matchInfo.missingSkills.length > 0 && (
+                  <Box>
+                    <HStack mb={2}>
+                      <Box color="orange.400">○</Box>
+                      <Text fontSize="sm" fontWeight="600" color="orange.300">
+                        Skills to Develop ({matchInfo.missingSkills.length})
+                      </Text>
+                    </HStack>
+                    <Flex wrap="wrap" gap={2}>
+                      {matchInfo.missingSkills.map((skill, index) => (
+                        <Badge key={index} bg="orange.600" color="white" px={2} py={1} borderRadius="full" fontSize="xs">
+                          ○ {skill}
+                        </Badge>
+                      ))}
+                    </Flex>
+                  </Box>
+                )}
+              </Box>
+            )}
+
+            {/* Location & Duration */}
+            <Box bg="whiteAlpha.100" p={4} borderRadius="xl">
+              <HStack spacing={6} wrap="wrap">
+                <HStack>
+                  <MapPin size={18} />
+                  <Text>{internship.location}</Text>
+                </HStack>
+                {internship.duration && (
+                  <HStack>
+                    <Clock size={18} />
+                    <Text>{internship.duration}</Text>
+                  </HStack>
+                )}
+                {fullInternship?.workSchedule && (
+                  <HStack>
+                    <Briefcase size={18} />
+                    <Text>{fullInternship.workSchedule}</Text>
+                  </HStack>
+                )}
+              </HStack>
+            </Box>
+
+            {/* About the Internship */}
+            <Box>
+              <Heading size="sm" mb={3} color="accent.300">About This Internship</Heading>
+              <Text color="whiteAlpha.900" lineHeight="1.7">
+                {internship.description}
+              </Text>
+            </Box>
+
+            {/* About Company */}
+            {fullInternship?.aboutCompany && (
+              <Box bg="whiteAlpha.50" p={4} borderRadius="xl" border="1px solid" borderColor="whiteAlpha.200">
+                <Heading size="sm" mb={3} color="blue.300">
+                  🏢 About {internship.organization}
+                </Heading>
+                <Text color="whiteAlpha.800" lineHeight="1.7">
+                  {fullInternship.aboutCompany}
+                </Text>
+              </Box>
+            )}
+
+            {/* Responsibilities */}
+            {fullInternship?.responsibilities && fullInternship.responsibilities.length > 0 && (
+              <Box>
+                <Heading size="sm" mb={3} color="accent.300">What You'll Do</Heading>
+                <VStack align="start" spacing={2}>
+                  {fullInternship.responsibilities.map((item, index) => (
+                    <HStack key={index} align="start">
+                      <Badge bg="accent.500" color="white" minW="24px" textAlign="center" borderRadius="full">
+                        {index + 1}
+                      </Badge>
+                      <Text color="whiteAlpha.900">{item}</Text>
+                    </HStack>
+                  ))}
+                </VStack>
+              </Box>
+            )}
+
+            {/* What You'll Learn */}
+            {fullInternship?.whatYoullLearn && fullInternship.whatYoullLearn.length > 0 && (
+              <Box>
+                <Heading size="sm" mb={3} color="green.300">🎓 What You'll Learn</Heading>
+                <VStack align="start" spacing={2}>
+                  {fullInternship.whatYoullLearn.map((item, index) => (
+                    <HStack key={index} align="start">
+                      <Text color="green.400">✓</Text>
+                      <Text color="whiteAlpha.900">{item}</Text>
+                    </HStack>
+                  ))}
+                </VStack>
+              </Box>
+            )}
+
+            {/* Skills You'll Gain */}
+            {fullInternship?.skillsYoullGain && fullInternship.skillsYoullGain.length > 0 && (
+              <Box>
+                <Heading size="sm" mb={3} color="purple.300">⭐ Skills You'll Gain</Heading>
+                <Flex wrap="wrap" gap={2}>
+                  {fullInternship.skillsYoullGain.map((skill, index) => (
+                    <Badge key={index} bg="purple.600" color="white" px={3} py={1} borderRadius="full">
+                      {skill}
+                    </Badge>
+                  ))}
+                </Flex>
+              </Box>
+            )}
+
+            {/* Project Examples */}
+            {fullInternship?.projectExamples && fullInternship.projectExamples.length > 0 && (
+              <Box>
+                <Heading size="sm" mb={3} color="cyan.300">💼 Example Projects</Heading>
+                <VStack align="start" spacing={2}>
+                  {fullInternship.projectExamples.map((project, index) => (
+                    <HStack key={index} align="start">
+                      <Text color="cyan.400">→</Text>
+                      <Text color="whiteAlpha.900">{project}</Text>
+                    </HStack>
+                  ))}
+                </VStack>
+              </Box>
+            )}
+
+            {/* Requirements */}
+            {fullInternship?.requirements && fullInternship.requirements.length > 0 && (
+              <Box>
+                <Heading size="sm" mb={3} color="accent.300">What We're Looking For</Heading>
+                <VStack align="start" spacing={2}>
+                  {fullInternship.requirements.map((item, index) => (
+                    <HStack key={index} align="start">
+                      <Text color="accent.400">•</Text>
+                      <Text color="whiteAlpha.900">{item}</Text>
+                    </HStack>
+                  ))}
+                </VStack>
+              </Box>
+            )}
+
+            {/* Benefits */}
+            {fullInternship?.benefits && fullInternship.benefits.length > 0 && (
+              <Box bg="green.900" bg-opacity="50" p={4} borderRadius="xl" border="1px solid" borderColor="green.600">
+                <Heading size="sm" mb={3} color="green.300">🎁 Benefits & Perks</Heading>
+                <VStack align="start" spacing={2}>
+                  {fullInternship.benefits.map((benefit, index) => (
+                    <HStack key={index} align="start">
+                      <Text color="green.400">★</Text>
+                      <Text color="whiteAlpha.900">{benefit}</Text>
+                    </HStack>
+                  ))}
+                </VStack>
+              </Box>
+            )}
+
+            {/* Additional Details */}
+            <Flex wrap="wrap" gap={4}>
+              {fullInternship?.teamSize && (
+                <Box bg="whiteAlpha.100" p={3} borderRadius="lg" flex="1" minW="140px">
+                  <Text fontSize="xs" color="whiteAlpha.600" mb={1}>Team Size</Text>
+                  <HStack>
+                    <Users size={16} />
+                    <Text fontWeight="500">{fullInternship.teamSize}</Text>
+                  </HStack>
+                </Box>
+              )}
+              {fullInternship?.applicationDeadline && (
+                <Box bg="whiteAlpha.100" p={3} borderRadius="lg" flex="1" minW="140px">
+                  <Text fontSize="xs" color="whiteAlpha.600" mb={1}>Application Deadline</Text>
+                  <HStack>
+                    <Clock size={16} />
+                    <Text fontWeight="500">{fullInternship.applicationDeadline}</Text>
+                  </HStack>
+                </Box>
+              )}
+              {fullInternship?.mentorship && (
+                <Box bg="whiteAlpha.100" p={3} borderRadius="lg" flex="1" minW="140px">
+                  <Text fontSize="xs" color="whiteAlpha.600" mb={1}>Mentorship</Text>
+                  <HStack>
+                    <Sparkles size={16} />
+                    <Text fontWeight="500">{fullInternship.mentorship}</Text>
+                  </HStack>
+                </Box>
+              )}
+            </Flex>
+
+            {/* Keywords */}
+            {fullInternship?.keywords && fullInternship.keywords.length > 0 && (
+              <Box>
+                <Heading size="sm" mb={3} color="whiteAlpha.700">Related Skills & Technologies</Heading>
+                <Flex wrap="wrap" gap={2}>
+                  {fullInternship.keywords.map((keyword, index) => (
+                    <Badge key={index} bg="whiteAlpha.200" color="whiteAlpha.900" px={2} py={1} borderRadius="md" fontSize="xs">
+                      {keyword}
+                    </Badge>
+                  ))}
+                </Flex>
+              </Box>
+            )}
+
+            {/* Action Buttons */}
+            <Flex gap={4} pt={4} borderTop="1px solid" borderColor="whiteAlpha.200">
+              <Button
+                flex={1}
+                bg="accent.500"
+                color="white"
+                _hover={{ bg: 'accent.600' }}
+                size="lg"
+                borderRadius="full"
+                leftIcon={<ArrowRight size={20} />}
+                onClick={() => window.open(fullInternship?.applyUrl || '#', '_blank')}
+              >
+                Apply Now
+              </Button>
+              <Button
+                variant="outline"
+                color="white"
+                borderColor="whiteAlpha.400"
+                _hover={{ bg: 'whiteAlpha.200' }}
+                size="lg"
+                borderRadius="full"
+                leftIcon={<Heart size={20} fill={isSaved ? 'currentColor' : 'none'} />}
+                onClick={() => onSave?.(internship.id)}
+              >
+                {isSaved ? 'Saved' : 'Save'}
+              </Button>
+            </Flex>
+          </VStack>
+        </DrawerBody>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
 // Search Page
 function SearchPage() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [savedIds, setSavedIds] = React.useState<string[]>([]);
+  const [selectedInternship, setSelectedInternship] = React.useState<InternshipData | ScoredInternship | null>(null);
+  const [selectedMatchInfo, setSelectedMatchInfo] = React.useState<SkillMatchInfo | null>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  
+  // Get ML context for matching
+  const { resumeAnalysis, getQuickMatch } = useMLRecommendations();
 
   const filteredInternships = mockInternships.filter(
     (i) =>
@@ -881,6 +1437,34 @@ function SearchPage() {
     setSavedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
+  };
+
+  const handleViewDetails = (internship: InternshipData | ScoredInternship) => {
+    setSelectedInternship(internship);
+    
+    // Get ML match if resume is available
+    if (resumeAnalysis) {
+      const fullInternship = mockInternships.find(i => i.id === internship.id);
+      if (fullInternship) {
+        const match = getQuickMatch(fullInternship);
+        if (match) {
+          setSelectedMatchInfo({
+            matchedSkills: match.explanation.matchedSkills,
+            missingSkills: match.explanation.missingSkills,
+            overallScore: match.score.overall,
+            skillScore: match.score.skillMatch,
+            experienceScore: match.score.experienceMatch,
+            keywordScore: match.score.keywordMatch
+          });
+        } else {
+          setSelectedMatchInfo(null);
+        }
+      }
+    } else {
+      setSelectedMatchInfo(null);
+    }
+    
+    onOpen();
   };
 
   return (
@@ -955,10 +1539,24 @@ function SearchPage() {
               internship={internship}
               isSaved={savedIds.includes(internship.id)}
               onSave={handleSave}
+              onViewDetails={handleViewDetails}
             />
           </Box>
         ))}
       </Flex>
+
+      {/* Internship Detail Drawer */}
+      <InternshipDetailDrawer
+        internship={selectedInternship}
+        isOpen={isOpen}
+        onClose={() => {
+          onClose();
+          setSelectedMatchInfo(null);
+        }}
+        isSaved={selectedInternship ? savedIds.includes(selectedInternship.id) : false}
+        onSave={handleSave}
+        matchInfo={selectedMatchInfo}
+      />
     </VStack>
   );
 }
@@ -979,12 +1577,19 @@ function RecommendationsPage({
 }: RecommendationsPageInlineProps = {}) {
   const [savedIds, setSavedIds] = React.useState<string[]>(savedInternshipIds);
   const [showExplanation, setShowExplanation] = React.useState(false);
+  const [selectedInternship, setSelectedInternship] = React.useState<InternshipData | ScoredInternship | null>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleSave = (id: string) => {
     setSavedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
     onSaveInternship?.(id);
+  };
+
+  const handleViewDetails = (internship: InternshipData | ScoredInternship) => {
+    setSelectedInternship(internship);
+    onOpen();
   };
 
   // Use ML-based recommendations
@@ -1098,6 +1703,7 @@ function RecommendationsPage({
               internship={recommendations[0]}
               isSaved={savedIds.includes(recommendations[0].id)}
               onSave={handleSave}
+              onViewDetails={handleViewDetails}
             />
             
             {/* Match Reasons */}
@@ -1140,10 +1746,20 @@ function RecommendationsPage({
               internship={internship}
               isSaved={savedIds.includes(internship.id)}
               onSave={handleSave}
+              onViewDetails={handleViewDetails}
             />
           </Box>
         ))}
       </Flex>
+
+      {/* Internship Detail Drawer */}
+      <InternshipDetailDrawer
+        internship={selectedInternship}
+        isOpen={isOpen}
+        onClose={onClose}
+        isSaved={selectedInternship ? savedIds.includes(selectedInternship.id) : false}
+        onSave={handleSave}
+      />
     </VStack>
   );
 }
@@ -1151,9 +1767,43 @@ function RecommendationsPage({
 // Saved Page
 function SavedPage() {
   const [savedInternships, setSavedInternships] = React.useState<InternshipData[]>(mockInternships.slice(0, 2));
+  const [selectedInternship, setSelectedInternship] = React.useState<InternshipData | ScoredInternship | null>(null);
+  const [selectedMatchInfo, setSelectedMatchInfo] = React.useState<SkillMatchInfo | null>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  
+  // Get ML context for matching
+  const { resumeAnalysis, getQuickMatch } = useMLRecommendations();
 
   const handleRemove = (id: string) => {
     setSavedInternships((prev) => prev.filter((i) => i.id !== id));
+  };
+
+  const handleViewDetails = (internship: InternshipData | ScoredInternship) => {
+    setSelectedInternship(internship);
+    
+    // Get ML match if resume is available
+    if (resumeAnalysis) {
+      const fullInternship = mockInternships.find(i => i.id === internship.id);
+      if (fullInternship) {
+        const match = getQuickMatch(fullInternship);
+        if (match) {
+          setSelectedMatchInfo({
+            matchedSkills: match.explanation.matchedSkills,
+            missingSkills: match.explanation.missingSkills,
+            overallScore: match.score.overall,
+            skillScore: match.score.skillMatch,
+            experienceScore: match.score.experienceMatch,
+            keywordScore: match.score.keywordMatch
+          });
+        } else {
+          setSelectedMatchInfo(null);
+        }
+      }
+    } else {
+      setSelectedMatchInfo(null);
+    }
+    
+    onOpen();
   };
 
   return (
@@ -1205,11 +1855,25 @@ function SavedPage() {
                 internship={internship}
                 isSaved={true}
                 onSave={handleRemove}
+                onViewDetails={handleViewDetails}
               />
             </Box>
           ))}
         </Flex>
       )}
+
+      {/* Internship Detail Drawer */}
+      <InternshipDetailDrawer
+        internship={selectedInternship}
+        isOpen={isOpen}
+        onClose={() => {
+          onClose();
+          setSelectedMatchInfo(null);
+        }}
+        isSaved={selectedInternship ? savedInternships.some(i => i.id === selectedInternship.id) : false}
+        onSave={handleRemove}
+        matchInfo={selectedMatchInfo}
+      />
     </VStack>
   );
 }

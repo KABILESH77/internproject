@@ -23,7 +23,18 @@ export interface Internship {
   description?: string;
   responsibilities?: string[];
   requirements?: string[];
+  keywords?: string[];
   applyUrl?: string;
+  // New detailed fields
+  aboutCompany?: string;
+  whatYoullLearn?: string[];
+  benefits?: string[];
+  applicationDeadline?: string;
+  workSchedule?: string;
+  teamSize?: string;
+  mentorship?: string;
+  projectExamples?: string[];
+  skillsYoullGain?: string[];
 }
 
 interface InternshipCardProps {

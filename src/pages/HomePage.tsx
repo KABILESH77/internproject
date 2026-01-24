@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Sparkles, Users, Shield, Zap, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Users, Shield, Zap, ArrowRight, AlertCircle } from 'lucide-react';
 import { Button } from '../components/Button';
 import { InternshipCard } from '../components/InternshipCard';
 import { InternshipDetailSlideOver } from '../components/InternshipDetailSlideOver';
@@ -15,6 +15,7 @@ interface HomePageProps {
   savedInternshipIds: string[];
   copyVariant: CopyVariant;
   userProfile: OnboardingData | null;
+  onNavigateToProfile?: () => void;
 }
 
 export function HomePage({
@@ -24,15 +25,70 @@ export function HomePage({
   onSaveInternship,
   savedInternshipIds,
   copyVariant,
-  userProfile
+  userProfile,
+  onNavigateToProfile
 }: HomePageProps) {
   const [selectedInternship, setSelectedInternship] = useState<string | null>(null);
+  const [profileCompletion, setProfileCompletion] = useState<{ percentage: number; isComplete: boolean } | null>(null);
+
+  // Check profile completion status
+  useEffect(() => {
+    const checkProfileCompletion = () => {
+      const saved = localStorage.getItem('jobrasa-profile-completion');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          setProfileCompletion(data);
+        } catch (e) {
+          console.error('Failed to parse profile completion');
+        }
+      }
+    };
+    
+    checkProfileCompletion();
+    
+    // Listen for storage changes (when profile is updated)
+    window.addEventListener('storage', checkProfileCompletion);
+    
+    // Also check on focus (when user comes back from profile page)
+    window.addEventListener('focus', checkProfileCompletion);
+    
+    return () => {
+      window.removeEventListener('storage', checkProfileCompletion);
+      window.removeEventListener('focus', checkProfileCompletion);
+    };
+  }, []);
 
   const featuredInternships = mockInternships.slice(0, 3);
   const selectedDetail = mockInternships.find(i => i.id === selectedInternship) || null;
 
   return (
     <div className="pb-16">
+      {/* Profile Incomplete Notification */}
+      {profileCompletion && !profileCompletion.isComplete && (
+        <div className="bg-red-50 border border-red-200 px-4 py-3">
+          <div className="container">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                <p className="text-red-700 text-sm font-medium">
+                  Your profile is only <span className="font-bold">{profileCompletion.percentage}%</span> complete. 
+                  Complete your profile to get better internship recommendations!
+                </p>
+              </div>
+              {onNavigateToProfile && (
+                <button 
+                  onClick={onNavigateToProfile}
+                  className="text-red-600 hover:text-red-800 text-sm font-semibold underline whitespace-nowrap"
+                >
+                  Complete Profile →
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[var(--color-primary-600)] to-[var(--color-primary-500)] text-white py-16 md:py-24">
         <div className="container">

@@ -1,6 +1,6 @@
 /**
  * Login Form Component
- * Email/password login with forgot password link
+ * Email/password login with forgot password link - White/Red theme
  */
 
 import React, { useState } from 'react';
@@ -48,10 +48,10 @@ export function LoginForm({ onSwitchToSignUp, onSwitchToForgotPassword, onSucces
 
   if (!isConfigured) {
     return (
-      <div className="p-6 text-center">
-        <AlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
-        <h3 className="text-white font-semibold mb-2">Supabase Not Configured</h3>
-        <p className="text-white/70 text-sm">
+      <div className="p-6 text-center bg-amber-50 rounded-xl border border-amber-200">
+        <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <h3 className="text-gray-800 font-semibold mb-2">Supabase Not Configured</h3>
+        <p className="text-gray-600 text-sm">
           Please add your Supabase credentials to the .env file to enable authentication.
         </p>
       </div>
@@ -60,53 +60,53 @@ export function LoginForm({ onSwitchToSignUp, onSwitchToForgotPassword, onSucces
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome Back</h2>
+        <p className="text-gray-500 text-sm">Sign in to access your personalized internships</p>
+      </div>
+
       {/* Error Display */}
       {displayError && (
-        <div className="p-3 rounded-xl bg-red-500/20 border border-red-500/50 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-          <p className="text-red-200 text-sm">{displayError}</p>
+        <div className="p-3 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+          <p className="text-red-600 text-sm">{displayError}</p>
         </div>
       )}
 
       {/* Email Field */}
-      <div>
-        <label htmlFor="login-email" className="block text-white/80 text-sm font-medium mb-2">
+      <div className="space-y-1">
+        <label htmlFor="login-email" className="block text-gray-700 text-sm font-medium">
           Email Address
         </label>
-        <div className="relative">
-          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-          <input
-            id="login-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#0a7676] focus:border-transparent transition-all"
-            disabled={loading}
-          />
-        </div>
+        <input
+          id="login-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full px-4 py-3 rounded-xl bg-white border-2 border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all shadow-sm"
+          disabled={loading}
+        />
       </div>
 
       {/* Password Field */}
-      <div>
-        <label htmlFor="login-password" className="block text-white/80 text-sm font-medium mb-2">
+      <div className="space-y-1">
+        <label htmlFor="login-password" className="block text-gray-700 text-sm font-medium">
           Password
         </label>
         <div className="relative">
-          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
           <input
             id="login-password"
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-            className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#0a7676] focus:border-transparent transition-all"
+            className="w-full px-4 pr-12 py-3 rounded-xl bg-white border-2 border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all shadow-sm"
             disabled={loading}
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
           >
             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
           </button>
@@ -118,7 +118,7 @@ export function LoginForm({ onSwitchToSignUp, onSwitchToForgotPassword, onSucces
         <button
           type="button"
           onClick={onSwitchToForgotPassword}
-          className="text-sm text-[#0a7676] hover:text-[#0d9494] transition-colors"
+          className="text-sm text-red-500 hover:text-red-600 font-medium transition-colors"
         >
           Forgot your password?
         </button>
@@ -128,7 +128,11 @@ export function LoginForm({ onSwitchToSignUp, onSwitchToForgotPassword, onSucces
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#0a7676] to-[#0d9494] text-white font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+        className="w-full py-3.5 px-4 rounded-xl text-white font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg"
+        style={{
+          background: 'linear-gradient(135deg, #DC3545 0%, #C82333 100%)',
+          boxShadow: '0 4px 15px rgba(220, 53, 69, 0.4)',
+        }}
       >
         {loading ? (
           <>
@@ -141,12 +145,12 @@ export function LoginForm({ onSwitchToSignUp, onSwitchToForgotPassword, onSucces
       </button>
 
       {/* Divider */}
-      <div className="relative">
+      <div className="relative py-2">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-white/20" />
+          <div className="w-full border-t border-gray-200" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-transparent text-white/50">or continue with</span>
+          <span className="px-4 bg-white text-gray-500">or continue with</span>
         </div>
       </div>
 
@@ -155,7 +159,7 @@ export function LoginForm({ onSwitchToSignUp, onSwitchToForgotPassword, onSucces
         type="button"
         onClick={handleGoogleSignIn}
         disabled={loading}
-        className="w-full py-3 px-4 rounded-xl bg-white text-gray-800 font-semibold hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3"
+        className="w-full py-3.5 px-4 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path
@@ -179,12 +183,12 @@ export function LoginForm({ onSwitchToSignUp, onSwitchToForgotPassword, onSucces
       </button>
 
       {/* Sign Up Link */}
-      <p className="text-center text-white/70 text-sm">
+      <p className="text-center text-gray-600 text-sm pt-2">
         Don't have an account?{' '}
         <button
           type="button"
           onClick={onSwitchToSignUp}
-          className="text-[#0a7676] hover:text-[#0d9494] font-semibold transition-colors"
+          className="text-red-500 hover:text-red-600 font-semibold transition-colors"
         >
           Sign up
         </button>

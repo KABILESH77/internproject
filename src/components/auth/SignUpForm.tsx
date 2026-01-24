@@ -1,6 +1,6 @@
 /**
  * Sign Up Form Component
- * Email/password registration with Google OAuth option
+ * Email/password registration with Google OAuth option - White/Red theme
  */
 
 import React, { useState } from 'react';
@@ -69,10 +69,10 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
 
   if (!isConfigured) {
     return (
-      <div className="p-6 text-center">
-        <AlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
-        <h3 className="text-white font-semibold mb-2">Supabase Not Configured</h3>
-        <p className="text-white/70 text-sm">
+      <div className="p-6 text-center bg-amber-50 rounded-xl border border-amber-200">
+        <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <h3 className="text-gray-800 font-semibold mb-2">Supabase Not Configured</h3>
+        <p className="text-gray-600 text-sm">
           Please add your Supabase credentials to the .env file to enable authentication.
         </p>
       </div>
@@ -82,15 +82,15 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
   if (success) {
     return (
       <div className="p-6 text-center">
-        <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-        <h3 className="text-white text-xl font-semibold mb-2">Check Your Email!</h3>
-        <p className="text-white/70 mb-6">
-          We've sent a confirmation link to <strong className="text-white">{email}</strong>.
+        <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+        <h3 className="text-gray-800 text-xl font-semibold mb-2">Check Your Email!</h3>
+        <p className="text-gray-600 mb-6">
+          We've sent a confirmation link to <strong className="text-gray-800">{email}</strong>.
           Please click the link to verify your account.
         </p>
         <button
           onClick={onSwitchToLogin}
-          className="px-6 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
+          className="px-6 py-2.5 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium transition-colors"
         >
           Back to Login
         </button>
@@ -100,11 +100,17 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Create Account</h2>
+        <p className="text-gray-500 text-sm">Start your internship journey today</p>
+      </div>
+
       {/* Error Display */}
       {displayError && (
-        <div className="p-3 rounded-xl bg-red-500/20 border border-red-500/50 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-          <p className="text-red-200 text-sm">{displayError}</p>
+        <div className="p-3 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+          <p className="text-red-600 text-sm">{displayError}</p>
         </div>
       )}
 
@@ -113,7 +119,7 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
         type="button"
         onClick={handleGoogleSignUp}
         disabled={loading}
-        className="w-full py-3 px-4 rounded-xl bg-white text-gray-800 font-semibold hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3"
+        className="w-full py-3.5 px-4 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path
@@ -137,73 +143,63 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
       </button>
 
       {/* Divider */}
-      <div className="relative">
+      <div className="relative py-2">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-white/20" />
+          <div className="w-full border-t border-gray-200" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-transparent text-white/50">or sign up with email</span>
+          <span className="px-4 bg-white text-gray-500">or sign up with email</span>
         </div>
       </div>
 
       {/* Full Name Field */}
-      <div>
-        <label htmlFor="signup-name" className="block text-white/80 text-sm font-medium mb-2">
+      <div className="space-y-1">
+        <label htmlFor="signup-name" className="block text-gray-700 text-sm font-medium">
           Full Name
         </label>
-        <div className="relative">
-          <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-          <input
-            id="signup-name"
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="John Doe"
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#0a7676] focus:border-transparent transition-all"
-            disabled={loading}
-          />
-        </div>
+        <input
+          id="signup-name"
+          type="text"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          className="w-full px-4 py-3 rounded-xl bg-white border-2 border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all shadow-sm"
+          disabled={loading}
+        />
       </div>
 
       {/* Email Field */}
-      <div>
-        <label htmlFor="signup-email" className="block text-white/80 text-sm font-medium mb-2">
+      <div className="space-y-1">
+        <label htmlFor="signup-email" className="block text-gray-700 text-sm font-medium">
           Email Address
         </label>
-        <div className="relative">
-          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-          <input
-            id="signup-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#0a7676] focus:border-transparent transition-all"
-            disabled={loading}
-          />
-        </div>
+        <input
+          id="signup-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full px-4 py-3 rounded-xl bg-white border-2 border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all shadow-sm"
+          disabled={loading}
+        />
       </div>
 
       {/* Password Field */}
-      <div>
-        <label htmlFor="signup-password" className="block text-white/80 text-sm font-medium mb-2">
+      <div className="space-y-1">
+        <label htmlFor="signup-password" className="block text-gray-700 text-sm font-medium">
           Password
         </label>
         <div className="relative">
-          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
           <input
             id="signup-password"
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Create a strong password"
-            className="w-full pl-12 pr-12 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#0a7676] focus:border-transparent transition-all"
+            className="w-full px-4 pr-12 py-3 rounded-xl bg-white border-2 border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all shadow-sm"
             disabled={loading}
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
           >
             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
           </button>
@@ -212,19 +208,19 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
         {/* Password Strength Indicators */}
         {password.length > 0 && (
           <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-            <div className={`flex items-center gap-1 ${hasMinLength ? 'text-green-400' : 'text-white/50'}`}>
+            <div className={`flex items-center gap-1 ${hasMinLength ? 'text-green-500' : 'text-gray-400'}`}>
               {hasMinLength ? <CheckCircle className="w-3 h-3" /> : <div className="w-3 h-3 rounded-full border border-current" />}
               8+ characters
             </div>
-            <div className={`flex items-center gap-1 ${hasUpperCase ? 'text-green-400' : 'text-white/50'}`}>
+            <div className={`flex items-center gap-1 ${hasUpperCase ? 'text-green-500' : 'text-gray-400'}`}>
               {hasUpperCase ? <CheckCircle className="w-3 h-3" /> : <div className="w-3 h-3 rounded-full border border-current" />}
               Uppercase
             </div>
-            <div className={`flex items-center gap-1 ${hasLowerCase ? 'text-green-400' : 'text-white/50'}`}>
+            <div className={`flex items-center gap-1 ${hasLowerCase ? 'text-green-500' : 'text-gray-400'}`}>
               {hasLowerCase ? <CheckCircle className="w-3 h-3" /> : <div className="w-3 h-3 rounded-full border border-current" />}
               Lowercase
             </div>
-            <div className={`flex items-center gap-1 ${hasNumber ? 'text-green-400' : 'text-white/50'}`}>
+            <div className={`flex items-center gap-1 ${hasNumber ? 'text-green-500' : 'text-gray-400'}`}>
               {hasNumber ? <CheckCircle className="w-3 h-3" /> : <div className="w-3 h-3 rounded-full border border-current" />}
               Number
             </div>
@@ -233,33 +229,31 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
       </div>
 
       {/* Confirm Password Field */}
-      <div>
-        <label htmlFor="signup-confirm" className="block text-white/80 text-sm font-medium mb-2">
+      <div className="space-y-1">
+        <label htmlFor="signup-confirm" className="block text-gray-700 text-sm font-medium">
           Confirm Password
         </label>
         <div className="relative">
-          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
           <input
             id="signup-confirm"
             type={showPassword ? 'text' : 'password'}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm your password"
-            className={`w-full pl-12 pr-12 py-3 rounded-xl bg-white/10 border text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#0a7676] focus:border-transparent transition-all ${
+            className={`w-full px-4 pr-12 py-3 rounded-xl bg-white border-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all shadow-sm ${
               confirmPassword.length > 0
                 ? passwordsMatch
-                  ? 'border-green-500/50'
-                  : 'border-red-500/50'
-                : 'border-white/20'
+                  ? 'border-green-500'
+                  : 'border-red-500'
+                : 'border-gray-300'
             }`}
             disabled={loading}
           />
           {confirmPassword.length > 0 && (
             <div className="absolute right-4 top-1/2 -translate-y-1/2">
               {passwordsMatch ? (
-                <CheckCircle className="w-5 h-5 text-green-400" />
+                <CheckCircle className="w-5 h-5 text-green-500" />
               ) : (
-                <AlertCircle className="w-5 h-5 text-red-400" />
+                <AlertCircle className="w-5 h-5 text-red-500" />
               )}
             </div>
           )}
@@ -270,7 +264,11 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#0a7676] to-[#0d9494] text-white font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+        className="w-full py-3.5 px-4 rounded-xl text-white font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg"
+        style={{
+          background: 'linear-gradient(135deg, #DC3545 0%, #C82333 100%)',
+          boxShadow: '0 4px 15px rgba(220, 53, 69, 0.4)',
+        }}
       >
         {loading ? (
           <>
@@ -283,12 +281,12 @@ export function SignUpForm({ onSwitchToLogin, onSuccess }: SignUpFormProps) {
       </button>
 
       {/* Login Link */}
-      <p className="text-center text-white/70 text-sm">
+      <p className="text-center text-gray-600 text-sm pt-2">
         Already have an account?{' '}
         <button
           type="button"
           onClick={onSwitchToLogin}
-          className="text-[#0a7676] hover:text-[#0d9494] font-semibold transition-colors"
+          className="text-red-500 hover:text-red-600 font-semibold transition-colors"
         >
           Sign in
         </button>

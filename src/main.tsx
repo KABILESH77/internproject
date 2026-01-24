@@ -1,9 +1,11 @@
 import { StrictMode } from 'react';
 import { createRoot } from "react-dom/client";
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
+import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { MLRecommendationsProvider } from './hooks/useMLRecommendations';
+import { router } from './router';
 import './index.css';
-import App from "./App.tsx";
 
 // Custom JobRasa Theme
 const theme = extendTheme({
@@ -66,7 +68,9 @@ if (root) {
     <StrictMode>
       <ChakraProvider theme={theme}>
         <AuthProvider>
-          <App />
+          <MLRecommendationsProvider>
+            <RouterProvider router={router} />
+          </MLRecommendationsProvider>
         </AuthProvider>
       </ChakraProvider>
     </StrictMode>

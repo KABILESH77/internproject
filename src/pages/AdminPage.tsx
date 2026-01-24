@@ -40,10 +40,8 @@ export function AdminPage({ weights, onWeightsChange }: AdminPageProps) {
     setLocationWeight(weights.location);
   }, [weights]);
 
-  // Check Ollama status on mount
-  useEffect(() => {
-    checkOllamaStatus();
-  }, []);
+  // Don't check Ollama on mount - only when user clicks refresh button
+  // This prevents network errors from appearing in console
 
   const checkOllamaStatus = async () => {
     setIsCheckingOllama(true);
