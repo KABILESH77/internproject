@@ -1,6 +1,13 @@
 /**
  * AI Chat Assistant Component
- * Reactive chatbot interface powered by Ollama/Llama
+ * Powered by Groq API with Llama models (Free)
+ * 
+ * Features:
+ * - Real AI conversation using Groq's free API
+ * - Smart fallback responses when no API key
+ * - API key configuration UI
+ * - Streaming responses
+ * - Context-aware career assistance
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -15,17 +22,22 @@ import {
   Sparkles,
   Loader2,
   AlertCircle,
-  RefreshCw
+  Settings,
+  Key,
+  Check,
+  ExternalLink
 } from 'lucide-react';
-import { Button } from './Button';
 import { 
   ChatMessage, 
   sendChatMessage, 
-  checkOllamaHealth,
   generateQuickSuggestions,
   getFallbackResponse,
-  ConversationContext
-} from '../services/ollamaService';
+  ConversationContext,
+  isAIConfigured,
+  saveApiKey,
+  clearApiKey,
+  testApiKey
+} from '../services/aiChatService';
 import { OnboardingData } from './OnboardingModal';
 import { Internship } from './InternshipCard';
 import { ScoredInternship } from '../services/recommendationEngine';
@@ -51,15 +63,21 @@ export function AIChatAssistant({
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [ollamaAvailable, setOllamaAvailable] = useState<boolean | null>(null);
   const [streamingMessage, setStreamingMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState('');
+  const [isTestingKey, setIsTestingKey] = useState(false);
+  const [apiKeyValid, setApiKeyValid] = useState<boolean | null>(null);
+  const [isConfigured, setIsConfigured] = useState(isAIConfigured());
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Don't check Ollama on mount - only when user sends first message
-  // This prevents network errors from appearing in console
+  // Check if API is configured on mount
+  useEffect(() => {
+    setIsConfigured(isAIConfigured());
+  }, []);
 
   // Initialize with welcome message
   useEffect(() => {
@@ -68,7 +86,7 @@ export function AIChatAssistant({
         role: 'assistant',
         content: userProfile 
           ? `Hi there! 👋 I'm JobRasa AI, your personal career assistant. I see you're interested in ${userProfile.interests.slice(0, 2).join(' and ')} with skills in ${userProfile.skills.slice(0, 2).join(' and ')}. How can I help you find the perfect internship today?`
-          : `Welcome to JobRasa! 👋 I'm your AI career assistant. I can help you discover internship opportunities, explain our matching system, or give you career advice. What would you like to explore?`,
+          : `Welcome to JobRasa! 👋 I'm your AI career assistant. I can help you discover internship opportunities, give you application tips, or provide career advice. What would you like to explore?`,
         timestamp: new Date()
       };
       setMessages([welcomeMessage]);
@@ -82,10 +100,10 @@ export function AIChatAssistant({
 
   // Focus input when opened
   useEffect(() => {
-    if (isOpen && !isMinimized) {
+    if (isOpen && !isMinimized && !showSettings) {
       inputRef.current?.focus();
     }
-  }, [isOpen, isMinimized]);
+  }, [isOpen, isMinimized, showSettings]);
 
   const getContext = useCallback((): ConversationContext => ({
     userProfile,
@@ -111,23 +129,15 @@ export function AIChatAssistant({
     
     try {
       const context = getContext();
-      let response: string;
       
-      if (ollamaAvailable) {
-        // Use Ollama with streaming
-        response = await sendChatMessage(
-          userMessage.content,
-          { ...context, conversationHistory: [...messages, userMessage] },
-          'llama3.2',
-          (chunk) => {
-            setStreamingMessage(prev => prev + chunk);
-          }
-        );
-      } else {
-        // Use fallback
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-        response = getFallbackResponse(userMessage.content, context);
-      }
+      // Send message with streaming support
+      const response = await sendChatMessage(
+        userMessage.content,
+        { ...context, conversationHistory: [...messages, userMessage] },
+        isConfigured ? (chunk) => {
+          setStreamingMessage(prev => prev + chunk);
+        } : undefined
+      );
       
       const assistantMessage: ChatMessage = {
         role: 'assistant',
@@ -137,9 +147,9 @@ export function AIChatAssistant({
       
       setMessages(prev => [...prev, assistantMessage]);
       setStreamingMessage('');
-    } catch {
-      // Silently use fallback - don't show error in console
-      setError('Using smart fallback mode.');
+    } catch (err) {
+      console.error('Chat error:', err);
+      setError('Something went wrong. Using smart responses.');
       
       // Fallback response
       const fallbackResponse = getFallbackResponse(userMessage.content, getContext());
@@ -167,17 +177,55 @@ export function AIChatAssistant({
     setTimeout(() => handleSendMessage(), 100);
   };
 
+  const handleSaveApiKey = async () => {
+    if (!apiKeyInput.trim()) return;
+    
+    setIsTestingKey(true);
+    setApiKeyValid(null);
+    
+    const result = await testApiKey(apiKeyInput.trim());
+    
+    if (result.valid) {
+      saveApiKey(apiKeyInput.trim());
+      setApiKeyValid(true);
+      setIsConfigured(true);
+      setApiKeyInput('');
+      
+      // Close settings after brief delay
+      setTimeout(() => {
+        setShowSettings(false);
+        setApiKeyValid(null);
+      }, 1500);
+    } else {
+      setApiKeyValid(false);
+      setError(result.error || 'Invalid API key');
+    }
+    
+    setIsTestingKey(false);
+  };
+
+  const handleClearApiKey = () => {
+    clearApiKey();
+    setIsConfigured(false);
+    setApiKeyInput('');
+    setApiKeyValid(null);
+  };
+
   const quickSuggestions = generateQuickSuggestions(getContext());
 
   if (!isOpen) return null;
 
   return (
     <div 
-      className={`fixed z-50 transition-all duration-300 ease-in-out ${
-        isMinimized 
-          ? 'bottom-4 right-4 w-auto h-auto' 
-          : 'bottom-4 right-4 w-96 h-[600px] max-h-[80vh]'
-      }`}
+      style={{
+        position: 'fixed',
+        bottom: '24px',
+        right: '24px',
+        zIndex: 9999,
+        width: isMinimized ? 'auto' : '380px',
+        height: isMinimized ? 'auto' : '500px',
+        maxHeight: '70vh',
+      }}
       role="dialog"
       aria-label="AI Chat Assistant"
     >
@@ -185,7 +233,19 @@ export function AIChatAssistant({
         /* Minimized State */
         <button
           onClick={() => setIsMinimized(false)}
-          className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-[var(--color-primary-600)] to-[var(--color-primary-700)] text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px 16px',
+            background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+            color: 'white',
+            borderRadius: '50px',
+            border: 'none',
+            boxShadow: '0 4px 20px rgba(124, 58, 237, 0.4)',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
         >
           <Bot className="w-5 h-5" />
           <span className="font-medium">JobRasa AI</span>
@@ -193,9 +253,28 @@ export function AIChatAssistant({
         </button>
       ) : (
         /* Full Chat Interface */
-        <div className="flex flex-col h-full bg-white rounded-2xl shadow-2xl border border-[var(--color-neutral-200)] overflow-hidden">
+        <div 
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            width: '100%',
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            border: '1px solid #e5e7eb',
+            overflow: 'hidden',
+          }}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-[var(--color-primary-600)] to-[var(--color-primary-700)] text-white">
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+            color: 'white',
+          }}>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                 <Sparkles className="w-5 h-5" />
@@ -203,12 +282,18 @@ export function AIChatAssistant({
               <div>
                 <h3 className="font-semibold">JobRasa AI</h3>
                 <p className="text-xs text-white/80">
-                  {ollamaAvailable === null ? 'Connecting...' : 
-                   ollamaAvailable ? 'Powered by Llama' : 'Smart Assistant'}
+                  {isConfigured ? 'Powered by Llama AI 🦙' : 'Smart Assistant ✨'}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-1">
+              <button
+                onClick={() => setShowSettings(!showSettings)}
+                className={`p-2 hover:bg-white/20 rounded-lg transition-colors ${showSettings ? 'bg-white/20' : ''}`}
+                aria-label="Settings"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
               <button
                 onClick={() => setIsMinimized(true)}
                 className="p-2 hover:bg-white/20 rounded-lg transition-colors"
@@ -226,44 +311,143 @@ export function AIChatAssistant({
             </div>
           </div>
 
-          {/* Status Banner */}
-          {ollamaAvailable === false && (
+          {/* Settings Panel */}
+          {showSettings && (
+            <div className="p-4 bg-gray-50 border-b border-gray-200">
+              <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                <Key className="w-4 h-4" />
+                AI Configuration
+              </h4>
+              <p className="text-xs text-gray-600 mb-3">
+                Get a free API key from{' '}
+                <a 
+                  href="https://console.groq.com/keys" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-purple-600 hover:underline inline-flex items-center gap-1"
+                >
+                  Groq Console <ExternalLink className="w-3 h-3" />
+                </a>
+              </p>
+              
+              {isConfigured ? (
+                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-2 text-green-700">
+                    <Check className="w-4 h-4" />
+                    <span className="text-sm font-medium">API Key Configured</span>
+                  </div>
+                  <button
+                    onClick={handleClearApiKey}
+                    className="text-xs text-red-600 hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <input
+                    type="password"
+                    value={apiKeyInput}
+                    onChange={(e) => setApiKeyInput(e.target.value)}
+                    placeholder="Enter your Groq API key..."
+                    className={`w-full px-3 py-2 text-sm border rounded-lg outline-none transition-colors ${
+                      apiKeyValid === false 
+                        ? 'border-red-300 focus:border-red-500' 
+                        : apiKeyValid === true
+                        ? 'border-green-300 focus:border-green-500'
+                        : 'border-gray-300 focus:border-purple-500'
+                    }`}
+                  />
+                  <button
+                    onClick={handleSaveApiKey}
+                    disabled={!apiKeyInput.trim() || isTestingKey}
+                    className="w-full px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  >
+                    {isTestingKey ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Testing...
+                      </>
+                    ) : apiKeyValid === true ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        Saved!
+                      </>
+                    ) : (
+                      'Save API Key'
+                    )}
+                  </button>
+                </div>
+              )}
+              
+              <p className="text-xs text-gray-500 mt-2">
+                💡 The chatbot works without an API key using smart responses!
+              </p>
+            </div>
+          )}
+
+          {/* Status Banner (only when not configured) */}
+          {!isConfigured && !showSettings && (
             <div className="px-4 py-2 bg-amber-50 border-b border-amber-200 text-amber-800 text-xs flex items-center gap-2">
-              <AlertCircle className="w-3 h-3" />
-              <span>Running in fallback mode. Start Ollama for full AI features.</span>
+              <AlertCircle className="w-3 h-3 flex-shrink-0" />
+              <span>Using smart responses. Add API key in settings for full AI.</span>
             </div>
           )}
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[var(--color-neutral-50)]">
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '16px',
+            backgroundColor: '#f9fafb',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+          }}>
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
+                style={{
+                  display: 'flex',
+                  gap: '10px',
+                  flexDirection: message.role === 'user' ? 'row-reverse' : 'row',
+                }}
               >
                 {/* Avatar */}
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                  message.role === 'user' 
-                    ? 'bg-[var(--color-accent-500)]' 
-                    : 'bg-[var(--color-primary-600)]'
-                }`}>
+                <div style={{
+                  flexShrink: 0,
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: message.role === 'user' ? '#14b8a6' : '#7c3aed',
+                }}>
                   {message.role === 'user' 
-                    ? <User className="w-4 h-4 text-white" />
-                    : <Bot className="w-4 h-4 text-white" />
+                    ? <User style={{ width: '16px', height: '16px', color: 'white' }} />
+                    : <Bot style={{ width: '16px', height: '16px', color: 'white' }} />
                   }
                 </div>
                 
                 {/* Message Bubble */}
-                <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                  message.role === 'user'
-                    ? 'bg-[var(--color-accent-500)] text-white rounded-tr-md'
-                    : 'bg-white border border-[var(--color-neutral-200)] text-[var(--color-neutral-900)] rounded-tl-md'
-                }`}>
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                <div style={{
+                  maxWidth: '75%',
+                  borderRadius: '16px',
+                  padding: '10px 14px',
+                  backgroundColor: message.role === 'user' ? '#14b8a6' : 'white',
+                  color: message.role === 'user' ? 'white' : '#1f2937',
+                  border: message.role === 'user' ? 'none' : '1px solid #e5e7eb',
+                  boxShadow: message.role === 'user' ? 'none' : '0 1px 2px rgba(0,0,0,0.05)',
+                }}>
+                  <p style={{ fontSize: '14px', whiteSpace: 'pre-wrap', margin: 0 }}>{message.content}</p>
                   {message.timestamp && (
-                    <p className={`text-xs mt-1 ${
-                      message.role === 'user' ? 'text-white/70' : 'text-[var(--color-neutral-500)]'
-                    }`}>
+                    <p style={{ 
+                      fontSize: '11px', 
+                      marginTop: '4px', 
+                      marginBottom: 0,
+                      opacity: 0.7,
+                    }}>
                       {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   )}
@@ -274,12 +458,12 @@ export function AIChatAssistant({
             {/* Streaming Message */}
             {streamingMessage && (
               <div className="flex gap-3">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--color-primary-600)] flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
-                <div className="max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3 bg-white border border-[var(--color-neutral-200)]">
+                <div className="max-w-[80%] rounded-2xl rounded-tl-md px-4 py-3 bg-white border border-gray-200 shadow-sm">
                   <p className="text-sm whitespace-pre-wrap">{streamingMessage}</p>
-                  <span className="inline-block w-2 h-4 bg-[var(--color-primary-500)] animate-pulse ml-1" />
+                  <span className="inline-block w-2 h-4 bg-purple-500 animate-pulse ml-1" />
                 </div>
               </div>
             )}
@@ -287,11 +471,11 @@ export function AIChatAssistant({
             {/* Loading Indicator */}
             {isLoading && !streamingMessage && (
               <div className="flex gap-3">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--color-primary-600)] flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
-                <div className="bg-white border border-[var(--color-neutral-200)] rounded-2xl rounded-tl-md px-4 py-3">
-                  <div className="flex items-center gap-2 text-[var(--color-neutral-600)]">
+                <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-4 py-3 shadow-sm">
+                  <div className="flex items-center gap-2 text-gray-600">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span className="text-sm">Thinking...</span>
                   </div>
@@ -303,15 +487,15 @@ export function AIChatAssistant({
           </div>
 
           {/* Quick Suggestions */}
-          {messages.length <= 2 && !isLoading && (
-            <div className="px-4 py-2 border-t border-[var(--color-neutral-200)] bg-white">
-              <p className="text-xs text-[var(--color-neutral-500)] mb-2">Quick actions:</p>
+          {messages.length <= 2 && !isLoading && !showSettings && (
+            <div className="px-4 py-2 border-t border-gray-200 bg-white">
+              <p className="text-xs text-gray-500 mb-2">Quick actions:</p>
               <div className="flex flex-wrap gap-2">
                 {quickSuggestions.map((suggestion, index) => (
                   <button
                     key={index}
                     onClick={() => handleQuickAction(suggestion)}
-                    className="text-xs px-3 py-1.5 bg-[var(--color-primary-50)] text-[var(--color-primary-700)] rounded-full hover:bg-[var(--color-primary-100)] transition-colors"
+                    className="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full hover:bg-purple-100 transition-colors"
                   >
                     {suggestion}
                   </button>
@@ -331,7 +515,7 @@ export function AIChatAssistant({
           )}
 
           {/* Input Area */}
-          <div className="p-4 border-t border-[var(--color-neutral-200)] bg-white">
+          <div className="p-4 border-t border-gray-200 bg-white">
             <div className="flex items-center gap-2">
               <input
                 ref={inputRef}
@@ -340,20 +524,20 @@ export function AIChatAssistant({
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask me anything about internships..."
-                className="flex-1 px-4 py-3 rounded-full border border-[var(--color-neutral-300)] focus:border-[var(--color-primary-500)] focus:ring-2 focus:ring-[var(--color-primary-100)] outline-none text-sm transition-all"
+                className="flex-1 px-4 py-3 rounded-full border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-100 outline-none text-sm transition-all"
                 disabled={isLoading}
               />
               <button
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim() || isLoading}
-                className="p-3 rounded-full bg-[var(--color-primary-600)] text-white hover:bg-[var(--color-primary-700)] disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105"
+                className="p-3 rounded-full bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105"
                 aria-label="Send message"
               >
                 <Send className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-xs text-center text-[var(--color-neutral-500)] mt-2">
-              {ollamaAvailable ? 'Powered by Llama 🦙' : 'Smart matching enabled ✨'}
+            <p className="text-xs text-center text-gray-500 mt-2">
+              {isConfigured ? 'Powered by Groq + Llama 🦙' : 'Smart responses enabled ✨'}
             </p>
           </div>
         </div>
@@ -371,19 +555,130 @@ interface ChatButtonProps {
 }
 
 export function AIChatButton({ onClick, hasUnread = false }: ChatButtonProps) {
+  const [isHovered, setIsHovered] = React.useState(false);
+  
   return (
-    <button
-      onClick={onClick}
-      className="fixed bottom-6 right-6 z-40 p-4 bg-gradient-to-r from-[var(--color-primary-600)] to-[var(--color-primary-700)] text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 group"
-      aria-label="Open AI Chat Assistant"
-    >
-      <MessageCircle className="w-6 h-6" />
-      {hasUnread && (
-        <span className="absolute top-0 right-0 w-3 h-3 bg-[var(--color-accent-500)] rounded-full animate-pulse" />
-      )}
-      <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[var(--color-neutral-900)] text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-        Ask JobRasa AI 🤖
-      </span>
-    </button>
+    <>
+      {/* CSS Keyframes for animations */}
+      <style>{`
+        @keyframes pulse-ring {
+          0% { transform: scale(1); opacity: 0.8; }
+          50% { transform: scale(1.3); opacity: 0; }
+          100% { transform: scale(1); opacity: 0; }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
+        @keyframes wiggle {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(-10deg); }
+          75% { transform: rotate(10deg); }
+        }
+        @keyframes sparkle {
+          0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+          50% { opacity: 1; transform: scale(1) rotate(180deg); }
+        }
+      `}</style>
+      
+      <button
+        onClick={onClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 9998,
+          padding: '16px',
+          background: isHovered 
+            ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' 
+            : 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+          color: 'white',
+          borderRadius: '50%',
+          border: 'none',
+          boxShadow: isHovered 
+            ? '0 8px 30px rgba(124, 58, 237, 0.6)' 
+            : '0 4px 20px rgba(124, 58, 237, 0.4)',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          animation: 'float 3s ease-in-out infinite',
+          transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+        }}
+        aria-label="Open AI Chat Assistant"
+      >
+        {/* Pulse ring effect */}
+        <span style={{
+          position: 'absolute',
+          inset: '-4px',
+          borderRadius: '50%',
+          border: '2px solid #7c3aed',
+          animation: 'pulse-ring 2s ease-out infinite',
+        }} />
+        
+        {/* Icon container with wiggle on hover */}
+        <span style={{
+          display: 'block',
+          animation: isHovered ? 'wiggle 0.5s ease-in-out' : 'none',
+        }}>
+          {isHovered ? (
+            <Sparkles style={{ width: '24px', height: '24px' }} />
+          ) : (
+            <MessageCircle style={{ width: '24px', height: '24px' }} />
+          )}
+        </span>
+        
+        {/* Notification dot with pulse */}
+        {hasUnread && (
+          <span style={{
+            position: 'absolute',
+            top: '-2px',
+            right: '-2px',
+            width: '14px',
+            height: '14px',
+            backgroundColor: '#14b8a6',
+            borderRadius: '50%',
+            border: '2px solid white',
+            animation: 'pulse-ring 1.5s ease-out infinite',
+          }} />
+        )}
+        
+        {/* Sparkle decorations on hover */}
+        {isHovered && (
+          <>
+            <span style={{
+              position: 'absolute',
+              top: '-8px',
+              right: '50%',
+              width: '8px',
+              height: '8px',
+              backgroundColor: '#fbbf24',
+              borderRadius: '50%',
+              animation: 'sparkle 0.6s ease-out forwards',
+            }} />
+            <span style={{
+              position: 'absolute',
+              top: '20%',
+              right: '-8px',
+              width: '6px',
+              height: '6px',
+              backgroundColor: '#34d399',
+              borderRadius: '50%',
+              animation: 'sparkle 0.6s ease-out 0.1s forwards',
+            }} />
+            <span style={{
+              position: 'absolute',
+              bottom: '-6px',
+              left: '30%',
+              width: '7px',
+              height: '7px',
+              backgroundColor: '#f472b6',
+              borderRadius: '50%',
+              animation: 'sparkle 0.6s ease-out 0.2s forwards',
+            }} />
+          </>
+        )}
+      </button>
+    </>
   );
 }
