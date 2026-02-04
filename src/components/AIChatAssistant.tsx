@@ -236,19 +236,19 @@ export function AIChatAssistant({
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
-            padding: '12px 16px',
-            background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+            gap: '10px',
+            padding: '10px 16px',
+            backgroundColor: '#0d9494',
             color: 'white',
-            borderRadius: '50px',
+            borderRadius: '10px',
             border: 'none',
-            boxShadow: '0 4px 20px rgba(124, 58, 237, 0.4)',
+            boxShadow: '0 2px 8px rgba(13, 148, 148, 0.3)',
             cursor: 'pointer',
             transition: 'all 0.2s',
           }}
         >
-          <Bot className="w-5 h-5" />
-          <span className="font-medium">JobRasa AI</span>
+          <MessageCircle className="w-5 h-5" />
+          <span style={{ fontWeight: '500', fontSize: '14px' }}>Chat</span>
           <Maximize2 className="w-4 h-4" />
         </button>
       ) : (
@@ -260,8 +260,8 @@ export function AIChatAssistant({
             height: '100%',
             width: '100%',
             backgroundColor: 'white',
-            borderRadius: '16px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            borderRadius: '12px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
             border: '1px solid #e5e7eb',
             overflow: 'hidden',
           }}
@@ -272,12 +272,12 @@ export function AIChatAssistant({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '12px 16px',
-            background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+            backgroundColor: '#0d9494',
             color: 'white',
           }}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                <Sparkles className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center">
+                <MessageCircle className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="font-semibold">JobRasa AI</h3>
@@ -555,130 +555,54 @@ interface ChatButtonProps {
 }
 
 export function AIChatButton({ onClick, hasUnread = false }: ChatButtonProps) {
-  const [isHovered, setIsHovered] = React.useState(false);
-  
   return (
-    <>
-      {/* CSS Keyframes for animations */}
-      <style>{`
-        @keyframes pulse-ring {
-          0% { transform: scale(1); opacity: 0.8; }
-          50% { transform: scale(1.3); opacity: 0; }
-          100% { transform: scale(1); opacity: 0; }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-6px); }
-        }
-        @keyframes wiggle {
-          0%, 100% { transform: rotate(0deg); }
-          25% { transform: rotate(-10deg); }
-          75% { transform: rotate(10deg); }
-        }
-        @keyframes sparkle {
-          0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
-          50% { opacity: 1; transform: scale(1) rotate(180deg); }
-        }
-      `}</style>
+    <button
+      onClick={onClick}
+      style={{
+        position: 'fixed',
+        bottom: '24px',
+        right: '24px',
+        zIndex: 9998,
+        padding: '14px',
+        backgroundColor: '#0d9494',
+        color: 'white',
+        borderRadius: '12px',
+        border: 'none',
+        boxShadow: '0 2px 8px rgba(13, 148, 148, 0.3)',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#0a7676';
+        e.currentTarget.style.boxShadow = '0 4px 12px rgba(13, 148, 148, 0.4)';
+        e.currentTarget.style.transform = 'translateY(-2px)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = '#0d9494';
+        e.currentTarget.style.boxShadow = '0 2px 8px rgba(13, 148, 148, 0.3)';
+        e.currentTarget.style.transform = 'translateY(0)';
+      }}
+      aria-label="Open Chat Assistant"
+    >
+      <MessageCircle style={{ width: '20px', height: '20px' }} />
+      <span style={{ fontSize: '14px', fontWeight: '500' }}>Chat</span>
       
-      <button
-        onClick={onClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          zIndex: 9998,
-          padding: '16px',
-          background: isHovered 
-            ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' 
-            : 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
-          color: 'white',
-          borderRadius: '50%',
-          border: 'none',
-          boxShadow: isHovered 
-            ? '0 8px 30px rgba(124, 58, 237, 0.6)' 
-            : '0 4px 20px rgba(124, 58, 237, 0.4)',
-          cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          animation: 'float 3s ease-in-out infinite',
-          transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-        }}
-        aria-label="Open AI Chat Assistant"
-      >
-        {/* Pulse ring effect */}
+      {/* Notification dot */}
+      {hasUnread && (
         <span style={{
           position: 'absolute',
-          inset: '-4px',
+          top: '-4px',
+          right: '-4px',
+          width: '12px',
+          height: '12px',
+          backgroundColor: '#ef4444',
           borderRadius: '50%',
-          border: '2px solid #7c3aed',
-          animation: 'pulse-ring 2s ease-out infinite',
+          border: '2px solid white',
         }} />
-        
-        {/* Icon container with wiggle on hover */}
-        <span style={{
-          display: 'block',
-          animation: isHovered ? 'wiggle 0.5s ease-in-out' : 'none',
-        }}>
-          {isHovered ? (
-            <Sparkles style={{ width: '24px', height: '24px' }} />
-          ) : (
-            <MessageCircle style={{ width: '24px', height: '24px' }} />
-          )}
-        </span>
-        
-        {/* Notification dot with pulse */}
-        {hasUnread && (
-          <span style={{
-            position: 'absolute',
-            top: '-2px',
-            right: '-2px',
-            width: '14px',
-            height: '14px',
-            backgroundColor: '#14b8a6',
-            borderRadius: '50%',
-            border: '2px solid white',
-            animation: 'pulse-ring 1.5s ease-out infinite',
-          }} />
-        )}
-        
-        {/* Sparkle decorations on hover */}
-        {isHovered && (
-          <>
-            <span style={{
-              position: 'absolute',
-              top: '-8px',
-              right: '50%',
-              width: '8px',
-              height: '8px',
-              backgroundColor: '#fbbf24',
-              borderRadius: '50%',
-              animation: 'sparkle 0.6s ease-out forwards',
-            }} />
-            <span style={{
-              position: 'absolute',
-              top: '20%',
-              right: '-8px',
-              width: '6px',
-              height: '6px',
-              backgroundColor: '#34d399',
-              borderRadius: '50%',
-              animation: 'sparkle 0.6s ease-out 0.1s forwards',
-            }} />
-            <span style={{
-              position: 'absolute',
-              bottom: '-6px',
-              left: '30%',
-              width: '7px',
-              height: '7px',
-              backgroundColor: '#f472b6',
-              borderRadius: '50%',
-              animation: 'sparkle 0.6s ease-out 0.2s forwards',
-            }} />
-          </>
-        )}
-      </button>
-    </>
+      )}
+    </button>
   );
 }

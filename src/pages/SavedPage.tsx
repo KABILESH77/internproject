@@ -32,14 +32,14 @@ export function SavedPage({
   };
 
   return (
-    <div className="py-8 min-h-screen bg-[var(--color-neutral-50)]">
+    <div style={{ padding: '32px 0', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
       <div className="container max-w-5xl">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <Bookmark className="w-8 h-8 text-[var(--color-accent-500)]" aria-hidden="true" />
-              <h1>Saved Internships</h1>
+              <Bookmark style={{ width: '32px', height: '32px', color: '#ff9500' }} aria-hidden="true" />
+              <h1 style={{ color: '#1f2937', fontSize: '1.75rem', fontWeight: '700' }}>Saved Internships</h1>
             </div>
             {savedInternships.length > 0 && (
               <Button
@@ -54,7 +54,7 @@ export function SavedPage({
           </div>
 
           {savedInternships.length > 0 && (
-            <p className="text-[var(--color-neutral-700)]">
+            <p style={{ color: '#6b7280' }}>
               You have {savedInternships.length} saved internship{savedInternships.length !== 1 ? 's' : ''}
             </p>
           )}
@@ -76,12 +76,12 @@ export function SavedPage({
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-white rounded-xl border-2 border-[var(--color-neutral-200)]">
-            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-[var(--color-neutral-100)] flex items-center justify-center">
-              <Bookmark className="w-12 h-12 text-[var(--color-neutral-400)]" />
+          <div style={{ textAlign: 'center', padding: '64px 0', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+            <div style={{ width: '96px', height: '96px', margin: '0 auto 24px', borderRadius: '50%', backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Bookmark style={{ width: '48px', height: '48px', color: '#9ca3af' }} />
             </div>
-            <h2 className="mb-4">No saved internships yet</h2>
-            <p className="text-[var(--color-neutral-700)] mb-8 max-w-md mx-auto">
+            <h2 style={{ marginBottom: '16px', color: '#1f2937', fontSize: '1.5rem', fontWeight: '700' }}>No saved internships yet</h2>
+            <p style={{ color: '#6b7280', marginBottom: '32px', maxWidth: '28rem', marginLeft: 'auto', marginRight: 'auto' }}>
               When you find internships you're interested in, save them here to review later
             </p>
             <Button
@@ -97,8 +97,8 @@ export function SavedPage({
 
         {/* Quick Actions */}
         {savedInternships.length > 0 && (
-          <div className="mt-8 bg-[var(--color-primary-50)] rounded-xl border-2 border-[var(--color-primary-200)] p-6">
-            <h3 className="mb-4">Quick Actions</h3>
+          <div style={{ marginTop: '32px', backgroundColor: '#e6f7f7', borderRadius: '16px', border: '1px solid #b3e6e6', padding: '24px' }}>
+            <h3 style={{ marginBottom: '16px', color: '#1f2937', fontSize: '1.125rem', fontWeight: '600' }}>Quick Actions</h3>
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 variant="accent"
@@ -116,7 +116,7 @@ export function SavedPage({
                 Export as PDF
               </Button>
             </div>
-            <p className="text-sm text-[var(--color-neutral-700)] mt-4">
+            <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '16px' }}>
               💡 Tip: Apply early to increase your chances. Most positions fill within 2-3 weeks.
             </p>
           </div>

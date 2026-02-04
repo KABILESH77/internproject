@@ -175,15 +175,13 @@ function App() {
     onClose();
   }, [navigate, onClose]);
 
-  const glassBg = useColorModeValue(
-    'rgba(255, 255, 255, 0.15)',
-    'rgba(0, 0, 0, 0.3)'
-  );
-
-  const glassHover = useColorModeValue(
-    'rgba(255, 255, 255, 0.25)',
-    'rgba(0, 0, 0, 0.4)'
-  );
+  // Clean professional colors
+  const headerBg = useColorModeValue('white', 'gray.900');
+  const headerBorder = useColorModeValue('gray.200', 'gray.700');
+  const textColor = useColorModeValue('gray.800', 'white');
+  const textMuted = useColorModeValue('gray.600', 'gray.400');
+  const hoverBg = useColorModeValue('gray.100', 'gray.800');
+  const activeBg = useColorModeValue('gray.200', 'gray.700');
 
   // If on auth page, render AuthPage instead of main layout
   if (currentPage === 'auth') {
@@ -200,7 +198,7 @@ function App() {
     <Box minH="100vh" position="relative">
       <AnimatedBackground />
 
-      {/* Glassmorphic Header */}
+      {/* Professional Header */}
       <Box
         as="header"
         position="fixed"
@@ -208,48 +206,45 @@ function App() {
         left={0}
         right={0}
         zIndex={100}
-        px={{ base: 4, md: 8 }}
-        py={3}
+        bg={headerBg}
+        borderBottom="1px solid"
+        borderColor={headerBorder}
+        boxShadow="0 1px 3px rgba(0, 0, 0, 0.05)"
       >
         <Flex
-          bg={glassBg}
-          backdropFilter="blur(20px)"
-          borderRadius="2xl"
-          px={{ base: 4, md: 6 }}
+          maxW="1400px"
+          mx="auto"
+          px={{ base: 4, md: 8 }}
           py={3}
           align="center"
           justify="space-between"
-          boxShadow="0 8px 32px rgba(0, 0, 0, 0.1)"
-          border="1px solid rgba(255, 255, 255, 0.2)"
         >
           {/* Logo */}
           <HStack spacing={3} cursor="pointer" onClick={() => navigate(ROUTES.home)}>
             <Box
-              bg="brand.500"
-              borderRadius="xl"
+              bg="teal.500"
+              borderRadius="lg"
               p={2}
-              boxShadow="0 4px 15px rgba(10, 118, 118, 0.4)"
             >
-              <Briefcase size={24} color="white" />
+              <Briefcase size={22} color="white" />
             </Box>
             <VStack spacing={0} align="start">
               <Heading
                 size="md"
-                color="white"
-                fontWeight="800"
+                color={textColor}
+                fontWeight="700"
                 letterSpacing="tight"
-                textShadow="0 2px 10px rgba(0,0,0,0.2)"
               >
                 JobRasa
               </Heading>
-              <Text fontSize="xs" color="whiteAlpha.800" fontWeight="500">
+              <Text fontSize="xs" color={textMuted} fontWeight="500">
                 Find Your Dream Internship
               </Text>
             </VStack>
           </HStack>
 
           {/* Desktop Navigation */}
-          <HStack spacing={2} display={{ base: 'none', lg: 'flex' }}>
+          <HStack spacing={1} display={{ base: 'none', lg: 'flex' }}>
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentPage === item.id;
@@ -259,14 +254,14 @@ function App() {
                   variant="ghost"
                   leftIcon={<Icon size={18} />}
                   onClick={() => handleNavClick(item.id as PageType)}
-                  bg={isActive ? 'rgba(255, 255, 255, 0.25)' : 'transparent'}
-                  color="white"
-                  _hover={{ bg: glassHover }}
-                  fontWeight={isActive ? '700' : '500'}
-                  borderRadius="xl"
+                  bg={isActive ? activeBg : 'transparent'}
+                  color={isActive ? 'teal.600' : textColor}
+                  _hover={{ bg: hoverBg }}
+                  fontWeight={isActive ? '600' : '500'}
+                  borderRadius="lg"
                   px={4}
-                  transition="all 0.2s"
-                  transform={isActive ? 'scale(1.02)' : 'scale(1)'}
+                  size="md"
+                  transition="all 0.15s"
                 >
                   {item.label}
                 </Button>
@@ -275,15 +270,16 @@ function App() {
           </HStack>
 
           {/* Right side controls */}
-          <HStack spacing={3}>
+          <HStack spacing={2}>
             <IconButton
               aria-label="Toggle theme"
-              icon={colorMode === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+              icon={colorMode === 'light' ? <Moon size={18} /> : <Sun size={18} />}
               onClick={toggleColorMode}
               variant="ghost"
-              color="white"
-              _hover={{ bg: glassHover }}
-              borderRadius="xl"
+              color={textMuted}
+              _hover={{ bg: hoverBg, color: textColor }}
+              borderRadius="lg"
+              size="md"
             />
             
             {/* Auth Controls */}
@@ -292,9 +288,9 @@ function App() {
                 <MenuButton
                   as={Button}
                   variant="ghost"
-                  color="white"
-                  _hover={{ bg: glassHover }}
-                  borderRadius="xl"
+                  color={textColor}
+                  _hover={{ bg: hoverBg }}
+                  borderRadius="lg"
                   rightIcon={<ChevronDown size={16} />}
                   display={{ base: 'none', md: 'flex' }}
                 >
@@ -365,11 +361,12 @@ function App() {
               <Button
                 leftIcon={<LogIn size={18} />}
                 onClick={() => navigate(ROUTES.auth)}
-                bg="brand.500"
+                bg="teal.500"
                 color="white"
-                _hover={{ bg: 'brand.600' }}
-                borderRadius="xl"
+                _hover={{ bg: 'teal.600' }}
+                borderRadius="lg"
                 fontWeight="600"
+                size="md"
                 display={{ base: 'none', md: 'flex' }}
               >
                 Sign In
@@ -378,13 +375,13 @@ function App() {
             
             <IconButton
               aria-label="Open menu"
-              icon={<Menu size={24} />}
+              icon={<Menu size={22} />}
               onClick={onOpen}
               display={{ base: 'flex', lg: 'none' }}
               variant="ghost"
-              color="white"
-              _hover={{ bg: glassHover }}
-              borderRadius="xl"
+              color={textColor}
+              _hover={{ bg: hoverBg }}
+              borderRadius="lg"
             />
           </HStack>
         </Flex>
@@ -392,34 +389,38 @@ function App() {
 
       {/* Mobile Drawer */}
       <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
-        <DrawerOverlay backdropFilter="blur(10px)" />
+        <DrawerOverlay bg="blackAlpha.300" />
         <DrawerContent
-          bg="linear-gradient(180deg, #0a7676 0%, #0d9494 100%)"
-          color="white"
+          bg="white"
+          color="gray.800"
         >
-          <DrawerCloseButton />
-          <DrawerHeader borderBottomWidth="1px" borderColor="whiteAlpha.200">
+          <DrawerCloseButton color="gray.600" />
+          <DrawerHeader borderBottomWidth="1px" borderColor="gray.200">
             <HStack>
-              <Briefcase size={24} />
-              <Text fontWeight="800">JobRasa</Text>
+              <Box bg="teal.500" borderRadius="lg" p={1.5}>
+                <Briefcase size={20} color="white" />
+              </Box>
+              <Text fontWeight="700" color="gray.800">JobRasa</Text>
             </HStack>
           </DrawerHeader>
           <DrawerBody pt={6}>
-            <VStack spacing={3} align="stretch">
+            <VStack spacing={2} align="stretch">
               {/* User info on mobile */}
               {user && (
                 <Box 
                   p={4} 
-                  bg="whiteAlpha.100" 
-                  borderRadius="xl" 
+                  bg="gray.50" 
+                  borderRadius="lg" 
                   mb={2}
+                  border="1px solid"
+                  borderColor="gray.200"
                 >
                   <HStack>
                     <Avatar 
                       size="sm" 
                       name={profile?.full_name || user.email || 'User'} 
                       src={profile?.avatar_url || undefined}
-                      bg="brand.600"
+                      bg="teal.500"
                     />
                     <VStack spacing={0} align="start">
                       <Text fontWeight="600" fontSize="sm">
@@ -439,15 +440,15 @@ function App() {
                 return (
                   <Button
                     key={item.id}
-                    leftIcon={<Icon size={20} />}
+                    leftIcon={<Icon size={18} />}
                     onClick={() => handleNavClick(item.id as PageType)}
-                    bg={isActive ? 'whiteAlpha.200' : 'transparent'}
-                    color="white"
-                    _hover={{ bg: 'whiteAlpha.300' }}
+                    bg={isActive ? 'gray.100' : 'transparent'}
+                    color={isActive ? 'teal.600' : 'gray.700'}
+                    _hover={{ bg: 'gray.100' }}
                     justifyContent="flex-start"
-                    fontWeight={isActive ? '700' : '500'}
-                    borderRadius="xl"
-                    py={6}
+                    fontWeight={isActive ? '600' : '500'}
+                    borderRadius="lg"
+                    py={5}
                   >
                     {item.label}
                   </Button>
@@ -458,51 +459,51 @@ function App() {
               {user ? (
                 <>
                   <Button
-                    leftIcon={<User size={20} />}
+                    leftIcon={<User size={18} />}
                     onClick={() => {
                       handleNavClick('profile');
                     }}
-                    bg={currentPage === 'profile' ? 'whiteAlpha.200' : 'transparent'}
-                    color="white"
-                    _hover={{ bg: 'whiteAlpha.300' }}
+                    bg={currentPage === 'profile' ? 'gray.100' : 'transparent'}
+                    color={currentPage === 'profile' ? 'teal.600' : 'gray.700'}
+                    _hover={{ bg: 'gray.100' }}
                     justifyContent="flex-start"
-                    fontWeight={currentPage === 'profile' ? '700' : '500'}
-                    borderRadius="xl"
-                    py={6}
+                    fontWeight={currentPage === 'profile' ? '600' : '500'}
+                    borderRadius="lg"
+                    py={5}
                     mt={4}
                   >
                     My Profile
                   </Button>
                   <Button
-                    leftIcon={<LogOut size={20} />}
+                    leftIcon={<LogOut size={18} />}
                     onClick={async () => {
                       await signOut();
                       onClose();
                       navigate(ROUTES.home);
                     }}
-                    bg="red.500"
-                    color="white"
-                    _hover={{ bg: 'red.600' }}
+                    bg="red.50"
+                    color="red.500"
+                    _hover={{ bg: 'red.100' }}
                     justifyContent="flex-start"
-                    borderRadius="xl"
-                    py={6}
+                    borderRadius="lg"
+                    py={5}
                   >
                     Sign Out
                   </Button>
                 </>
               ) : (
                 <Button
-                  leftIcon={<LogIn size={20} />}
+                  leftIcon={<LogIn size={18} />}
                   onClick={() => {
                     onClose();
                     navigate(ROUTES.auth);
                   }}
-                  bg="brand.600"
+                  bg="teal.500"
                   color="white"
-                  _hover={{ bg: 'brand.700' }}
+                  _hover={{ bg: 'teal.600' }}
                   justifyContent="flex-start"
-                  borderRadius="xl"
-                  py={6}
+                  borderRadius="lg"
+                  py={5}
                   mt={4}
                 >
                   Sign In
@@ -514,7 +515,7 @@ function App() {
       </Drawer>
 
       {/* Main Content */}
-      <Box pt="100px" pb={8}>
+      <Box pt="80px" pb={8}>
         <Container maxW="7xl">
           {currentPage === 'home' && <HomePage onNavigate={handleNavClick} />}
           {currentPage === 'search' && <SearchPage />}
@@ -632,7 +633,7 @@ function HomePage({ onNavigate }: { onNavigate: (page: PageType) => void }) {
         <Text 
           textAlign="center" 
           fontSize="sm" 
-          color="whiteAlpha.700" 
+          color="gray.500" 
           mb={4}
           textTransform="uppercase"
           letterSpacing="wider"
@@ -665,7 +666,7 @@ function HomePage({ onNavigate }: { onNavigate: (page: PageType) => void }) {
       {/* Hero Section */}
       <VStack spacing={6} textAlign="center" maxW="800px" mx="auto">
         <Badge
-          bg="accent.500"
+          bg="teal.500"
           color="white"
           px={4}
           py={2}
@@ -673,25 +674,23 @@ function HomePage({ onNavigate }: { onNavigate: (page: PageType) => void }) {
           fontSize="sm"
           fontWeight="600"
           textTransform="none"
-          boxShadow="0 4px 15px rgba(255, 149, 0, 0.4)"
         >
           🚀 AI-Powered Internship Matching
         </Badge>
         <Heading
           as="h1"
           size={{ base: '2xl', md: '4xl' }}
-          color="white"
-          fontWeight="900"
+          color="gray.800"
+          fontWeight="800"
           lineHeight="1.1"
-          textShadow="0 4px 20px rgba(0,0,0,0.3)"
         >
           Find Your Perfect
-          <Text as="span" color="accent.300"> Internship </Text>
+          <Text as="span" color="teal.500"> Internship </Text>
           Match
         </Heading>
         <Text
           fontSize={{ base: 'lg', md: 'xl' }}
-          color="whiteAlpha.900"
+          color="gray.600"
           maxW="600px"
           lineHeight="1.7"
         >
@@ -701,15 +700,15 @@ function HomePage({ onNavigate }: { onNavigate: (page: PageType) => void }) {
         <HStack spacing={4} pt={4}>
           <Button
             size="lg"
-            bg="white"
-            color="brand.600"
-            _hover={{ bg: 'whiteAlpha.900', transform: 'translateY(-2px)' }}
+            bg="teal.500"
+            color="white"
+            _hover={{ bg: 'teal.600', transform: 'translateY(-2px)' }}
             rightIcon={<ArrowRight size={20} />}
-            borderRadius="full"
+            borderRadius="lg"
             px={8}
-            fontWeight="700"
-            boxShadow="0 10px 30px rgba(0,0,0,0.2)"
-            transition="all 0.3s"
+            fontWeight="600"
+            boxShadow="0 4px 12px rgba(13, 148, 148, 0.3)"
+            transition="all 0.2s"
             onClick={() => onNavigate('recommendations')}
           >
             Get Matched
@@ -717,14 +716,14 @@ function HomePage({ onNavigate }: { onNavigate: (page: PageType) => void }) {
           <Button
             size="lg"
             variant="outline"
-            color="white"
-            borderColor="whiteAlpha.400"
-            _hover={{ bg: 'whiteAlpha.200', transform: 'translateY(-2px)' }}
+            color="gray.700"
+            borderColor="gray.300"
+            _hover={{ bg: 'gray.50', transform: 'translateY(-2px)' }}
             rightIcon={<Search size={20} />}
-            borderRadius="full"
+            borderRadius="lg"
             px={8}
             fontWeight="600"
-            transition="all 0.3s"
+            transition="all 0.2s"
             onClick={() => onNavigate('search')}
           >
             Browse All
@@ -798,15 +797,14 @@ function HomePage({ onNavigate }: { onNavigate: (page: PageType) => void }) {
 
       {/* Stats Section */}
       <Flex
-        bg="rgba(255, 255, 255, 0.1)"
-        backdropFilter="blur(20px)"
-        borderRadius="3xl"
+        bg="gray.50"
+        borderRadius="2xl"
         p={{ base: 6, md: 10 }}
         gap={{ base: 6, md: 12 }}
         wrap="wrap"
         justify="center"
-        border="1px solid rgba(255, 255, 255, 0.2)"
-        boxShadow="0 20px 50px rgba(0, 0, 0, 0.1)"
+        border="1px solid"
+        borderColor="gray.200"
       >
         <StatItem value="10,000+" label="Internships" />
         <StatItem value="500+" label="Companies" />
@@ -830,31 +828,30 @@ function FeatureCard({
 }) {
   return (
     <Box
-      bg="rgba(255, 255, 255, 0.1)"
-      backdropFilter="blur(20px)"
-      borderRadius="2xl"
+      bg="white"
+      borderRadius="xl"
       p={6}
       w={{ base: 'full', sm: '280px' }}
-      border="1px solid rgba(255, 255, 255, 0.2)"
-      transition="all 0.3s"
-      _hover={{ transform: 'translateY(-5px)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
+      border="1px solid"
+      borderColor="gray.200"
+      transition="all 0.2s"
+      _hover={{ transform: 'translateY(-4px)', boxShadow: '0 12px 24px rgba(0,0,0,0.1)', borderColor: 'teal.300' }}
       cursor="pointer"
     >
       <Box
         bg={gradient}
-        borderRadius="xl"
+        borderRadius="lg"
         p={3}
         w="fit-content"
         color="white"
         mb={4}
-        boxShadow="0 8px 20px rgba(0,0,0,0.2)"
       >
         {icon}
       </Box>
-      <Heading size="md" color="white" mb={2} fontWeight="700">
+      <Heading size="md" color="gray.800" mb={2} fontWeight="600">
         {title}
       </Heading>
-      <Text color="whiteAlpha.800" fontSize="sm" lineHeight="1.6">
+      <Text color="gray.600" fontSize="sm" lineHeight="1.6">
         {description}
       </Text>
     </Box>
@@ -866,13 +863,12 @@ function StatItem({ value, label }: { value: string; label: string }) {
     <VStack spacing={1}>
       <Text
         fontSize={{ base: '2xl', md: '4xl' }}
-        fontWeight="900"
-        color="white"
-        textShadow="0 2px 10px rgba(0,0,0,0.2)"
+        fontWeight="800"
+        color="teal.600"
       >
         {value}
       </Text>
-      <Text color="whiteAlpha.800" fontWeight="500" fontSize="sm">
+      <Text color="gray.600" fontWeight="500" fontSize="sm">
         {label}
       </Text>
     </VStack>

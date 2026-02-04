@@ -90,19 +90,19 @@ export function HomePage({
       )}
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[var(--color-primary-600)] to-[var(--color-primary-500)] text-white py-16 md:py-24">
+      <section style={{ backgroundColor: '#0d9494', color: 'white', padding: '64px 0' }}>
         <div className="container">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 text-white mb-6">
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '9999px', backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', marginBottom: '24px' }}>
               <Shield className="w-5 h-5" aria-hidden="true" />
-              <span className="text-sm font-medium">Trusted by Government Agencies</span>
+              <span style={{ fontSize: '14px', fontWeight: '500' }}>Trusted by Government Agencies</span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-white">
+            <h1 style={{ fontSize: '2.5rem', fontWeight: '700', marginBottom: '24px', lineHeight: '1.2', color: 'white' }}>
               {getCopy('heroTitle', copyVariant)}
             </h1>
 
-            <p className="text-xl md:text-2xl mb-10 text-[var(--color-primary-100)] leading-relaxed">
+            <p style={{ fontSize: '1.25rem', marginBottom: '40px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.6' }}>
               {getCopy('heroSubtitle', copyVariant)}
             </p>
 
@@ -117,17 +117,33 @@ export function HomePage({
                 {getCopy('quickProfileCTA', copyVariant)}
               </Button>
 
-              <Button
-                variant="outline"
-                size="lg"
+              <button
                 onClick={onGuestBrowse}
-                className="text-lg px-8 py-5 border-white text-white hover:bg-white hover:text-[var(--color-primary-700)]"
+                style={{
+                  fontSize: '16px',
+                  padding: '16px 32px',
+                  border: '2px solid white',
+                  borderRadius: '12px',
+                  backgroundColor: 'transparent',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.color = '#0d9494';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'white';
+                }}
               >
                 {getCopy('guestMode', copyVariant)}
-              </Button>
+              </button>
             </div>
 
-            <p className="mt-6 text-[var(--color-primary-100)] text-sm">
+            <p style={{ marginTop: '24px', color: 'rgba(255,255,255,0.8)', fontSize: '14px' }}>
               ✓ No account required • ✓ Free to use • ✓ Beginner friendly
             </p>
           </div>
@@ -135,37 +151,37 @@ export function HomePage({
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-white">
+      <section style={{ padding: '64px 0', backgroundColor: '#f8fafc' }}>
         <div className="container">
-          <h2 className="text-center mb-12">Why Students Love JobRasa</h2>
+          <h2 style={{ textAlign: 'center', marginBottom: '48px', color: '#1f2937', fontSize: '2rem', fontWeight: '700' }}>Why Students Love JobRasa</h2>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center p-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-[var(--color-primary-100)] text-[var(--color-primary-700)] flex items-center justify-center">
+            <div style={{ textAlign: 'center', padding: '32px', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+              <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '12px', backgroundColor: '#e6f7f7', color: '#0d9494', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Zap className="w-8 h-8" aria-hidden="true" />
               </div>
-              <h3 className="mb-3">Quick & Easy</h3>
-              <p className="text-[var(--color-neutral-700)] leading-relaxed">
+              <h3 style={{ marginBottom: '12px', color: '#1f2937', fontSize: '1.25rem', fontWeight: '600' }}>Quick & Easy</h3>
+              <p style={{ color: '#6b7280', lineHeight: '1.6' }}>
                 Just 3 steps and 2 minutes to get personalized internship recommendations
               </p>
             </div>
 
-            <div className="text-center p-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-[var(--color-accent-100)] text-[var(--color-accent-700)] flex items-center justify-center">
+            <div style={{ textAlign: 'center', padding: '32px', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+              <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '12px', backgroundColor: '#fff4e6', color: '#ff9500', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Sparkles className="w-8 h-8" aria-hidden="true" />
               </div>
-              <h3 className="mb-3">Smart Matching</h3>
-              <p className="text-[var(--color-neutral-700)] leading-relaxed">
+              <h3 style={{ marginBottom: '12px', color: '#1f2937', fontSize: '1.25rem', fontWeight: '600' }}>Smart Matching</h3>
+              <p style={{ color: '#6b7280', lineHeight: '1.6' }}>
                 Our algorithm matches you based on skills, interests, and location
               </p>
             </div>
 
-            <div className="text-center p-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-[var(--color-success-100)] text-[var(--color-success-700)] flex items-center justify-center">
+            <div style={{ textAlign: 'center', padding: '32px', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+              <div style={{ width: '64px', height: '64px', margin: '0 auto 16px', borderRadius: '12px', backgroundColor: '#f0fdf4', color: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Users className="w-8 h-8" aria-hidden="true" />
               </div>
-              <h3 className="mb-3">Beginner Friendly</h3>
-              <p className="text-[var(--color-neutral-700)] leading-relaxed">
+              <h3 style={{ marginBottom: '12px', color: '#1f2937', fontSize: '1.25rem', fontWeight: '600' }}>Beginner Friendly</h3>
+              <p style={{ color: '#6b7280', lineHeight: '1.6' }}>
                 Most positions welcome first-time interns with no prior experience
               </p>
             </div>
@@ -175,12 +191,12 @@ export function HomePage({
 
       {/* Featured Internships */}
       {hasCompletedOnboarding && userProfile ? (
-        <section className="py-16 bg-[var(--color-neutral-50)]">
+        <section style={{ padding: '64px 0', backgroundColor: 'white' }}>
           <div className="container">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="mb-2">Your Top Matches</h2>
-                <p className="text-[var(--color-neutral-700)]">
+                <h2 style={{ marginBottom: '8px', color: '#1f2937', fontSize: '1.75rem', fontWeight: '700' }}>Your Top Matches</h2>
+                <p style={{ color: '#6b7280' }}>
                   Based on your profile: {userProfile.skills.slice(0, 3).join(', ')}
                 </p>
               </div>
@@ -202,10 +218,10 @@ export function HomePage({
           </div>
         </section>
       ) : (
-        <section className="py-16 bg-[var(--color-neutral-50)]">
+        <section style={{ padding: '64px 0', backgroundColor: 'white' }}>
           <div className="container">
-            <h2 className="text-center mb-4">Explore Sample Opportunities</h2>
-            <p className="text-center text-[var(--color-neutral-700)] mb-12 max-w-2xl mx-auto">
+            <h2 style={{ textAlign: 'center', marginBottom: '16px', color: '#1f2937', fontSize: '1.75rem', fontWeight: '700' }}>Explore Sample Opportunities</h2>
+            <p style={{ textAlign: 'center', color: '#6b7280', marginBottom: '48px', maxWidth: '42rem', marginLeft: 'auto', marginRight: 'auto' }}>
               Here's what you'll see after completing your quick profile
             </p>
 
@@ -214,7 +230,7 @@ export function HomePage({
                 <div key={internship.id} className="relative">
                   {index === 0 && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-accent-500)] text-white text-sm font-semibold shadow-lg">
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '9999px', backgroundColor: '#ff9500', color: 'white', fontSize: '14px', fontWeight: '600', boxShadow: '0 4px 12px rgba(255,149,0,0.3)' }}>
                         <Sparkles className="w-4 h-4" /> Top Match
                       </span>
                     </div>
@@ -246,10 +262,10 @@ export function HomePage({
       )}
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-[var(--color-primary-700)] to-[var(--color-primary-600)] text-white">
+      <section style={{ padding: '64px 0', backgroundColor: '#0a7676', color: 'white' }}>
         <div className="container text-center">
-          <h2 className="mb-4 text-white">Ready to Start Your Journey?</h2>
-          <p className="text-xl mb-8 text-[var(--color-primary-100)] max-w-2xl mx-auto">
+          <h2 style={{ marginBottom: '16px', color: 'white', fontSize: '2rem', fontWeight: '700' }}>Ready to Start Your Journey?</h2>
+          <p style={{ fontSize: '1.25rem', marginBottom: '32px', color: 'rgba(255,255,255,0.9)', maxWidth: '42rem', marginLeft: 'auto', marginRight: 'auto' }}>
             Join thousands of students finding meaningful internships in public service
           </p>
           <Button

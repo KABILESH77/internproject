@@ -71,22 +71,34 @@ export function SearchPage({
   };
 
   return (
-    <div className="py-8 min-h-screen bg-[var(--color-neutral-50)]">
+    <div style={{ padding: '32px 0', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
       <div className="container">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="mb-6">Search Internships</h1>
+          <h1 style={{ marginBottom: '24px', color: '#1f2937', fontSize: '1.75rem', fontWeight: '700' }}>Search Internships</h1>
 
           {/* Search Bar */}
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-[var(--color-neutral-500)]" aria-hidden="true" />
+              <Search style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '24px', height: '24px', color: '#9ca3af' }} aria-hidden="true" />
               <input
                 type="text"
                 placeholder="Search by title, organization, or keyword..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-14 pr-4 py-4 min-h-[56px] rounded-xl border-2 border-[var(--color-neutral-300)] bg-white text-lg focus:outline-none focus:ring-3 focus:ring-[var(--color-primary-500)] focus:border-[var(--color-primary-500)]"
+                style={{
+                  width: '100%',
+                  paddingLeft: '56px',
+                  paddingRight: '16px',
+                  paddingTop: '16px',
+                  paddingBottom: '16px',
+                  borderRadius: '12px',
+                  border: '1px solid #d1d5db',
+                  backgroundColor: 'white',
+                  fontSize: '16px',
+                  color: '#1f2937',
+                  outline: 'none',
+                }}
                 aria-label="Search internships"
               />
             </div>
@@ -100,7 +112,7 @@ export function SearchPage({
             >
               Filters
               {activeFilterCount > 0 && (
-                <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[var(--color-accent-500)] text-white text-sm flex items-center justify-center font-semibold">
+                <span style={{ position: 'absolute', top: '-8px', right: '-8px', width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#ff9500', color: 'white', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '600' }}>
                   {activeFilterCount}
                 </span>
               )}
@@ -110,13 +122,13 @@ export function SearchPage({
 
         {/* Filters Panel */}
         {showFilters && (
-          <div className="bg-white rounded-xl border-2 border-[var(--color-neutral-300)] p-6 mb-8">
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e5e7eb', padding: '24px', marginBottom: '32px' }}>
             <div className="flex items-center justify-between mb-6">
-              <h3>Filter Results</h3>
+              <h3 style={{ color: '#1f2937', fontSize: '1.125rem', fontWeight: '600' }}>Filter Results</h3>
               {activeFilterCount > 0 && (
                 <button
                   onClick={clearFilters}
-                  className="text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] font-medium focus:outline-none focus:underline"
+                  style={{ color: '#0d9494', fontWeight: '500', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
                   Clear all
                 </button>
@@ -126,18 +138,18 @@ export function SearchPage({
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Sector Filter */}
               <div>
-                <label className="flex items-center gap-2 font-medium mb-3">
-                  <Briefcase className="w-5 h-5 text-[var(--color-primary-600)]" aria-hidden="true" />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', marginBottom: '12px', color: '#374151' }}>
+                  <Briefcase style={{ width: '20px', height: '20px', color: '#0d9494' }} aria-hidden="true" />
                   Sector
                 </label>
                 <div className="space-y-2">
                   {sectors.slice(0, 4).map(sector => (
-                    <label key={sector} className="flex items-center gap-2 cursor-pointer min-h-[40px]">
+                    <label key={sector} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', minHeight: '40px', color: '#4b5563' }}>
                       <input
                         type="checkbox"
                         checked={selectedSector.includes(sector)}
                         onChange={() => toggleSector(sector)}
-                        className="w-5 h-5 rounded border-2 border-[var(--color-neutral-400)] text-[var(--color-primary-600)] focus:ring-2 focus:ring-[var(--color-primary-500)] cursor-pointer"
+                        style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#0d9494' }}
                       />
                       <span>{sector}</span>
                     </label>
@@ -147,15 +159,15 @@ export function SearchPage({
 
               {/* City Filter */}
               <div>
-                <label htmlFor="city-filter" className="flex items-center gap-2 font-medium mb-3">
-                  <MapPin className="w-5 h-5 text-[var(--color-primary-600)]" aria-hidden="true" />
+                <label htmlFor="city-filter" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', marginBottom: '12px', color: '#374151' }}>
+                  <MapPin style={{ width: '20px', height: '20px', color: '#0d9494' }} aria-hidden="true" />
                   Location
                 </label>
                 <select
                   id="city-filter"
                   value={selectedCity}
                   onChange={(e) => setSelectedCity(e.target.value)}
-                  className="w-full px-4 py-3 min-h-[48px] rounded-lg border-2 border-[var(--color-neutral-300)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
+                  style={{ width: '100%', padding: '12px 16px', minHeight: '48px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: 'white', color: '#1f2937', fontSize: '16px' }}
                 >
                   {cities.map(city => (
                     <option key={city} value={city}>{city}</option>
@@ -165,23 +177,23 @@ export function SearchPage({
 
               {/* Quick Filters */}
               <div>
-                <label className="font-medium mb-3 block">Quick Filters</label>
+                <label style={{ fontWeight: '500', marginBottom: '12px', display: 'block', color: '#374151' }}>Quick Filters</label>
                 <div className="space-y-3">
-                  <label className="flex items-center gap-2 cursor-pointer min-h-[40px]">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', minHeight: '40px', color: '#4b5563' }}>
                     <input
                       type="checkbox"
                       checked={showRemoteOnly}
                       onChange={(e) => setShowRemoteOnly(e.target.checked)}
-                      className="w-5 h-5 rounded border-2 border-[var(--color-neutral-400)] text-[var(--color-primary-600)] focus:ring-2 focus:ring-[var(--color-primary-500)] cursor-pointer"
+                      style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#0d9494' }}
                     />
                     <span>Remote only</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer min-h-[40px]">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', minHeight: '40px', color: '#4b5563' }}>
                     <input
                       type="checkbox"
                       checked={showBeginnerOnly}
                       onChange={(e) => setShowBeginnerOnly(e.target.checked)}
-                      className="w-5 h-5 rounded border-2 border-[var(--color-neutral-400)] text-[var(--color-primary-600)] focus:ring-2 focus:ring-[var(--color-primary-500)] cursor-pointer"
+                      style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#0d9494' }}
                     />
                     <span>
                       <Award className="w-4 h-4 inline mr-1" aria-hidden="true" />
@@ -193,12 +205,12 @@ export function SearchPage({
 
               {/* Sort */}
               <div>
-                <label htmlFor="sort-select" className="font-medium mb-3 block">Sort By</label>
+                <label htmlFor="sort-select" style={{ fontWeight: '500', marginBottom: '12px', display: 'block', color: '#374151' }}>Sort By</label>
                 <select
                   id="sort-select"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="w-full px-4 py-3 min-h-[48px] rounded-lg border-2 border-[var(--color-neutral-300)] bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
+                  style={{ width: '100%', padding: '12px 16px', minHeight: '48px', borderRadius: '8px', border: '1px solid #d1d5db', backgroundColor: 'white', color: '#1f2937', fontSize: '16px' }}
                 >
                   <option value="best-match">Best Match</option>
                   <option value="nearest">Nearest First</option>
@@ -211,9 +223,9 @@ export function SearchPage({
 
         {/* Results */}
         <div className="mb-6">
-          <p className="text-[var(--color-neutral-700)]">
-            Showing <span className="font-semibold">{filteredInternships.length}</span> internship{filteredInternships.length !== 1 ? 's' : ''}
-            {searchQuery && <> for "<span className="font-semibold">{searchQuery}</span>"</>}
+          <p style={{ color: '#4b5563' }}>
+            Showing <span style={{ fontWeight: '600', color: '#1f2937' }}>{filteredInternships.length}</span> internship{filteredInternships.length !== 1 ? 's' : ''}
+            {searchQuery && <> for "<span style={{ fontWeight: '600', color: '#1f2937' }}>{searchQuery}</span>"</>}
           </p>
         </div>
 
@@ -233,10 +245,10 @@ export function SearchPage({
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-white rounded-xl border-2 border-[var(--color-neutral-200)]">
-            <Search className="w-16 h-16 mx-auto mb-4 text-[var(--color-neutral-400)]" />
-            <h3 className="mb-2">No internships found</h3>
-            <p className="text-[var(--color-neutral-700)] mb-6">
+          <div style={{ textAlign: 'center', padding: '64px 0', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+            <Search style={{ width: '64px', height: '64px', margin: '0 auto 16px', color: '#9ca3af' }} />
+            <h3 style={{ marginBottom: '8px', color: '#1f2937', fontSize: '1.25rem', fontWeight: '600' }}>No internships found</h3>
+            <p style={{ color: '#6b7280', marginBottom: '24px' }}>
               Try adjusting your filters or search query
             </p>
             {activeFilterCount > 0 && (
