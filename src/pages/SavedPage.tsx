@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bookmark, Trash2, ExternalLink } from 'lucide-react';
 import { Button } from '../components/Button';
 import { InternshipCard } from '../components/InternshipCard';
@@ -20,6 +21,7 @@ export function SavedPage({
   copyVariant,
   userProfile
 }: SavedPageProps) {
+  const navigate = useNavigate();
   const [selectedInternship, setSelectedInternship] = useState<string | null>(null);
 
   const savedInternships = mockInternships.filter(i => savedInternshipIds.includes(i.id));
@@ -70,7 +72,7 @@ export function SavedPage({
                 variant="default"
                 onSave={onSaveInternship}
                 onViewDetails={setSelectedInternship}
-                onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+                onApply={(id) => navigate(`/apply/${id}`)}
                 isSaved={true}
               />
             ))}
@@ -128,7 +130,7 @@ export function SavedPage({
         internship={selectedDetail}
         isOpen={selectedInternship !== null}
         onClose={() => setSelectedInternship(null)}
-        onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+        onApply={(id) => navigate(`/apply/${id}`)}
         onSave={onSaveInternship}
         isSaved={true}
       />

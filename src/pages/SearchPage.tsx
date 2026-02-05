@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, SlidersHorizontal, X, MapPin, Briefcase, Award } from 'lucide-react';
 import { Button } from '../components/Button';
 import { InternshipCard } from '../components/InternshipCard';
@@ -22,6 +23,7 @@ export function SearchPage({
   copyVariant,
   userProfile
 }: SearchPageProps) {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedSector, setSelectedSector] = useState<string[]>([]);
@@ -239,7 +241,7 @@ export function SearchPage({
                 variant="default"
                 onSave={onSaveInternship}
                 onViewDetails={setSelectedInternship}
-                onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+                onApply={(id) => navigate(`/apply/${id}`)}
                 isSaved={savedInternshipIds.includes(internship.id)}
               />
             ))}
@@ -265,7 +267,7 @@ export function SearchPage({
         internship={selectedDetail}
         isOpen={selectedInternship !== null}
         onClose={() => setSelectedInternship(null)}
-        onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+        onApply={(id) => navigate(`/apply/${id}`)}
         onSave={onSaveInternship}
         isSaved={selectedInternship ? savedInternshipIds.includes(selectedInternship) : false}
       />

@@ -18,6 +18,7 @@ export const ROUTES = {
   profile: '/profile',
   auth: '/auth',
   authCallback: '/auth/callback',
+  apply: '/apply',
 } as const;
 
 // Reverse mapping: path -> pageId

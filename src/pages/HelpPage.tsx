@@ -87,25 +87,25 @@ export function HelpPage({ copyVariant }: HelpPageProps) {
   ];
 
   return (
-    <div className="py-8 min-h-screen bg-[var(--color-neutral-50)]">
+    <div style={{ padding: '32px 0', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
       <div className="container max-w-4xl">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--color-primary-100)] text-[var(--color-primary-700)] mb-4">
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#b3e6e6', color: '#075959', marginBottom: '16px' }}>
             <HelpCircle className="w-8 h-8" aria-hidden="true" />
           </div>
-          <h1 className="mb-4">{getCopy('helpTitle', copyVariant)}</h1>
-          <p className="text-xl text-[var(--color-neutral-700)]">
+          <h1 style={{ marginBottom: '16px', color: '#1f2937', fontSize: '2rem', fontWeight: '700' }}>{getCopy('helpTitle', copyVariant)}</h1>
+          <p style={{ fontSize: '20px', color: '#4b5563' }}>
             Everything you need to know to get started
           </p>
         </div>
 
         {/* Tutorial Section */}
-        <section className="bg-white rounded-xl border-2 border-[var(--color-neutral-200)] p-8 mb-8">
+        <section style={{ backgroundColor: 'white', borderRadius: '12px', border: '2px solid #e5e5e5', padding: '32px', marginBottom: '32px' }}>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <Play className="w-6 h-6 text-[var(--color-accent-500)]" aria-hidden="true" />
-              <h2 className="text-xl">Interactive Tutorial</h2>
+              <Play style={{ width: '24px', height: '24px', color: '#ff9500' }} aria-hidden="true" />
+              <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937' }}>Interactive Tutorial</h2>
             </div>
             <Button
               variant="accent"
@@ -118,23 +118,23 @@ export function HelpPage({ copyVariant }: HelpPageProps) {
           </div>
 
           {showTutorial && (
-            <div className="space-y-6 pt-6 border-t-2 border-[var(--color-neutral-200)]">
+            <div className="space-y-6" style={{ paddingTop: '24px', borderTop: '2px solid #e5e5e5' }}>
               {tutorialSteps.map((step, index) => (
-                <div key={index} className="flex gap-4 p-6 bg-[var(--color-primary-50)] rounded-xl">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-white flex items-center justify-center text-2xl">
+                <div key={index} className="flex gap-4" style={{ padding: '24px', backgroundColor: '#e6f7f7', borderRadius: '12px' }}>
+                  <div style={{ flexShrink: 0, width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
                     {step.icon}
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                    <p className="text-[var(--color-neutral-700)]">{step.description}</p>
+                    <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#1f2937' }}>{step.title}</h3>
+                    <p style={{ color: '#4b5563' }}>{step.description}</p>
                   </div>
                 </div>
               ))}
 
-              <div className="bg-[var(--color-accent-50)] rounded-xl p-6 text-center">
-                <CheckCircle className="w-12 h-12 mx-auto mb-3 text-[var(--color-success-600)]" />
-                <h3 className="mb-2">That's it!</h3>
-                <p className="text-[var(--color-neutral-700)] mb-4">
+              <div style={{ backgroundColor: '#fff4e6', borderRadius: '12px', padding: '24px', textAlign: 'center' }}>
+                <CheckCircle style={{ width: '48px', height: '48px', margin: '0 auto 12px', color: '#22c55e' }} />
+                <h3 style={{ marginBottom: '8px', color: '#1f2937', fontWeight: '600' }}>That's it!</h3>
+                <p style={{ color: '#4b5563', marginBottom: '16px' }}>
                   You're ready to find your perfect internship match.
                 </p>
                 <Button variant="accent" size="lg">
@@ -146,47 +146,45 @@ export function HelpPage({ copyVariant }: HelpPageProps) {
         </section>
 
         {/* Quick Tips */}
-        <section className="bg-gradient-to-r from-[var(--color-accent-50)] to-[var(--color-primary-50)] rounded-xl border-2 border-[var(--color-accent-200)] p-8 mb-8">
+        <section style={{ background: 'linear-gradient(to right, #fff4e6, #e6f7f7)', borderRadius: '12px', border: '2px solid #ffe0b3', padding: '32px', marginBottom: '32px' }}>
           <div className="flex items-center gap-3 mb-4">
-            <Lightbulb className="w-6 h-6 text-[var(--color-accent-600)]" aria-hidden="true" />
-            <h2 className="text-xl">Quick Tips</h2>
+            <Lightbulb style={{ width: '24px', height: '24px', color: '#cc7700' }} aria-hidden="true" />
+            <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937' }}>Quick Tips</h2>
           </div>
           <ul className="space-y-3">
             {quickTips.map((tip, index) => (
               <li key={index} className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-[var(--color-success-600)] flex-shrink-0 mt-0.5" aria-hidden="true" />
-                <span className="text-[var(--color-neutral-800)]">{tip}</span>
+                <CheckCircle style={{ width: '20px', height: '20px', color: '#22c55e', flexShrink: 0, marginTop: '2px' }} aria-hidden="true" />
+                <span style={{ color: '#1f2937' }}>{tip}</span>
               </li>
             ))}
           </ul>
         </section>
 
         {/* FAQ Section */}
-        <section className="bg-white rounded-xl border-2 border-[var(--color-neutral-200)] p-8 mb-8">
+        <section style={{ backgroundColor: 'white', borderRadius: '12px', border: '2px solid #e5e5e5', padding: '32px', marginBottom: '32px' }}>
           <div className="flex items-center gap-3 mb-6">
-            <BookOpen className="w-6 h-6 text-[var(--color-primary-600)]" aria-hidden="true" />
-            <h2 className="text-xl">Frequently Asked Questions</h2>
+            <BookOpen style={{ width: '24px', height: '24px', color: '#0d9494' }} aria-hidden="true" />
+            <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937' }}>Frequently Asked Questions</h2>
           </div>
 
           <div className="space-y-3">
             {faqs.map((faq, index) => (
-              <div key={index} className="border-2 border-[var(--color-neutral-200)] rounded-lg overflow-hidden">
+              <div key={index} style={{ border: '2px solid #e5e5e5', borderRadius: '8px', overflow: 'hidden' }}>
                 <button
                   onClick={() => setActiveFAQ(activeFAQ === index ? null : index)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-[var(--color-neutral-50)] transition-colors min-h-[64px] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--color-primary-500)]"
+                  style={{ width: '100%', padding: '16px 24px', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: '64px', backgroundColor: 'white', border: 'none', cursor: 'pointer', color: '#1f2937' }}
                   aria-expanded={activeFAQ === index}
                 >
-                  <span className="font-semibold pr-4">{faq.question}</span>
+                  <span style={{ fontWeight: '600', paddingRight: '16px' }}>{faq.question}</span>
                   <ChevronDown
-                    className={`w-5 h-5 flex-shrink-0 transition-transform ${
-                      activeFAQ === index ? 'rotate-180' : ''
-                    }`}
+                    style={{ width: '20px', height: '20px', flexShrink: 0, transition: 'transform 0.2s', transform: activeFAQ === index ? 'rotate(180deg)' : 'rotate(0deg)' }}
                     aria-hidden="true"
                   />
                 </button>
                 {activeFAQ === index && (
-                  <div className="px-6 py-4 bg-[var(--color-neutral-50)] border-t-2 border-[var(--color-neutral-200)]">
-                    <p className="text-[var(--color-neutral-700)] leading-relaxed">{faq.answer}</p>
+                  <div style={{ padding: '16px 24px', backgroundColor: '#fafafa', borderTop: '2px solid #e5e5e5' }}>
+                    <p style={{ color: '#4b5563', lineHeight: '1.6' }}>{faq.answer}</p>
                   </div>
                 )}
               </div>
@@ -195,10 +193,10 @@ export function HelpPage({ copyVariant }: HelpPageProps) {
         </section>
 
         {/* Contact Support */}
-        <section className="bg-gradient-to-r from-[var(--color-primary-600)] to-[var(--color-primary-500)] text-white rounded-xl p-8 text-center">
-          <MessageCircle className="w-12 h-12 mx-auto mb-4" aria-hidden="true" />
-          <h2 className="text-2xl mb-3 text-white">Still Need Help?</h2>
-          <p className="text-[var(--color-primary-100)] mb-6 text-lg">
+        <section style={{ background: 'linear-gradient(to right, #0a7676, #0d9494)', color: 'white', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
+          <MessageCircle style={{ width: '48px', height: '48px', margin: '0 auto 16px' }} aria-hidden="true" />
+          <h2 style={{ fontSize: '24px', marginBottom: '12px', color: 'white', fontWeight: '700' }}>Still Need Help?</h2>
+          <p style={{ color: '#b3e6e6', marginBottom: '24px', fontSize: '18px' }}>
             Our support team is here to help you succeed
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -218,7 +216,7 @@ export function HelpPage({ copyVariant }: HelpPageProps) {
               Call Us
             </Button>
           </div>
-          <p className="mt-4 text-sm text-[var(--color-primary-100)]">
+          <p style={{ marginTop: '16px', fontSize: '14px', color: '#b3e6e6' }}>
             Available Monday-Friday, 9am-5pm EST
           </p>
         </section>

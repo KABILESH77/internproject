@@ -61,6 +61,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatedBackground } from './components/AnimatedBackground';
 import { AIChatAssistant, AIChatButton } from './components/AIChatAssistant';
+import { VoiceChat, VoiceChatButton } from './components/VoiceChat';
 import { ProtectedRoute } from './components/auth';
 import { useAuth } from './context/AuthContext';
 import { OnboardingData } from './components/OnboardingModal';
@@ -70,6 +71,8 @@ import { ProfilePage } from './pages/ProfilePage';
 import { AuthPage } from './pages/AuthPage';
 import { MLRecommendationsPage } from './pages/MLRecommendationsPage';
 import { AdminPage } from './pages/AdminPage';
+import { ApplyPage } from './pages/ApplyPage';
+import { SearchPage as SearchPageComponent } from './pages/SearchPage';
 import { ROUTES, getPageFromPath, getPathForPage, PageType } from './router';
 import { Carousel, CarouselImage } from './components/Carousel';
 import { LogoSlider, Logo } from './components/LogoSlider';
@@ -116,6 +119,10 @@ function App() {
   // Derive current page from URL path
   const currentPage = getPageFromPath(location.pathname);
   
+  // Check if we're on an apply page (e.g., /apply/123)
+  const isApplyPage = location.pathname.startsWith('/apply/');
+  const applyInternshipId = isApplyPage ? location.pathname.split('/apply/')[1] : null;
+  
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { colorMode, toggleColorMode } = useColorMode();
   
@@ -124,6 +131,9 @@ function App() {
   
   // AI Chat state
   const [isChatOpen, setIsChatOpen] = useState(false);
+  
+  // Voice Chat state
+  const [isVoiceChatOpen, setIsVoiceChatOpen] = useState(false);
   
   // User profile state (simulated - in production would persist)
   const [userProfile, setUserProfile] = useState<OnboardingData | null>({
@@ -517,9 +527,23 @@ function App() {
       {/* Main Content */}
       <Box pt="80px" pb={8}>
         <Container maxW="7xl">
-          {currentPage === 'home' && <HomePage onNavigate={handleNavClick} />}
-          {currentPage === 'search' && <SearchPage />}
-          {currentPage === 'recommendations' && (
+          {/* Apply Page - Full width, no sidebar navigation */}
+          {isApplyPage && applyInternshipId && (
+            <ApplyPage 
+              internshipId={applyInternshipId} 
+              onBack={() => navigate(-1)}
+            />
+          )}
+          {!isApplyPage && currentPage === 'home' && <HomePage onNavigate={handleNavClick} />}
+          {!isApplyPage && currentPage === 'search' && (
+            <SearchPageComponent 
+              onSaveInternship={handleSaveInternship}
+              savedInternshipIds={savedInternshipIds}
+              copyVariant="default"
+              userProfile={userProfile}
+            />
+          )}
+          {!isApplyPage && currentPage === 'recommendations' && (
             <ProtectedRoute onLoginClick={() => navigate(ROUTES.auth)}>
               <MLRecommendationsPage 
                 onSaveInternship={handleSaveInternship}
@@ -527,16 +551,16 @@ function App() {
               />
             </ProtectedRoute>
           )}
-          {currentPage === 'saved' && (
+          {!isApplyPage && currentPage === 'saved' && (
             <ProtectedRoute onLoginClick={() => navigate(ROUTES.auth)}>
               <SavedPage />
             </ProtectedRoute>
           )}
-          {currentPage === 'help' && <HelpPage />}
-          {currentPage === 'profile' && (
+          {!isApplyPage && currentPage === 'help' && <HelpPage />}
+          {!isApplyPage && currentPage === 'profile' && (
             <ProfilePage onBack={() => navigate(ROUTES.home)} />
           )}
-          {currentPage === 'admin' && (
+          {!isApplyPage && currentPage === 'admin' && (
             <AdminPage 
               weights={weights}
               onWeightsChange={setWeights}
@@ -546,8 +570,13 @@ function App() {
       </Box>
 
       {/* AI Chat Button */}
-      {!isChatOpen && (
+      {!isChatOpen && !isVoiceChatOpen && (
         <AIChatButton onClick={() => setIsChatOpen(true)} />
+      )}
+
+      {/* Voice Chat Button */}
+      {!isChatOpen && !isVoiceChatOpen && (
+        <VoiceChatButton onClick={() => setIsVoiceChatOpen(true)} />
       )}
 
       {/* AI Chat Assistant */}
@@ -557,6 +586,12 @@ function App() {
         recommendations={recommendations}
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
+      />
+
+      {/* Voice Chat Assistant */}
+      <VoiceChat
+        isOpen={isVoiceChatOpen}
+        onClose={() => setIsVoiceChatOpen(false)}
       />
     </Box>
   );

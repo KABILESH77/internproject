@@ -8,18 +8,28 @@ interface BadgeProps {
   className?: string;
 }
 
-export function Badge({ variant = 'default', children, className = '' }: BadgeProps) {
-  const variantStyles: Record<BadgeVariant, string> = {
-    beginner: 'bg-[var(--color-success-50)] text-[var(--color-success-700)] border-[var(--color-success-500)]',
-    remote: 'bg-[var(--color-primary-50)] text-[var(--color-primary-700)] border-[var(--color-primary-500)]',
-    stipend: 'bg-[var(--color-accent-50)] text-[var(--color-accent-700)] border-[var(--color-accent-500)]',
-    verified: 'bg-[var(--color-primary-100)] text-[var(--color-primary-800)] border-[var(--color-primary-600)]',
-    default: 'bg-[var(--color-neutral-100)] text-[var(--color-neutral-700)] border-[var(--color-neutral-400)]'
-  };
+const variantInlineStyles: Record<BadgeVariant, React.CSSProperties> = {
+  beginner: { backgroundColor: '#22c55e', color: 'white', border: '1px solid #22c55e' },
+  remote: { backgroundColor: '#0d9494', color: 'white', border: '1px solid #0d9494' },
+  stipend: { backgroundColor: '#ff9500', color: 'white', border: '1px solid #ff9500' },
+  verified: { backgroundColor: '#b3e6e6', color: '#043b3b', border: '1px solid #0d9494' },
+  default: { backgroundColor: '#f5f5f5', color: '#404040', border: '1px solid #a3a3a3' }
+};
 
+export function Badge({ variant = 'default', children, className = '' }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${variantStyles[variant]} ${className}`}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '4px 10px',
+        borderRadius: '9999px',
+        fontSize: '12px',
+        fontWeight: '500',
+        ...variantInlineStyles[variant]
+      }}
+      className={className}
       role="status"
       aria-label={`${variant} badge`}
     >
@@ -37,10 +47,20 @@ interface ReasonTagProps {
 export function ReasonTag({ icon, children, className = '' }: ReasonTagProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-neutral-100)] text-[var(--color-neutral-700)] text-sm ${className}`}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '6px 12px',
+        borderRadius: '8px',
+        backgroundColor: '#f5f5f5',
+        color: '#404040',
+        fontSize: '14px'
+      }}
+      className={className}
       role="note"
     >
-      {icon && <span className="flex-shrink-0" aria-hidden="true">{icon}</span>}
+      {icon && <span style={{ flexShrink: 0 }} aria-hidden="true">{icon}</span>}
       <span>{children}</span>
     </span>
   );

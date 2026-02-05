@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sparkles, Users, Shield, Zap, ArrowRight, AlertCircle } from 'lucide-react';
 import { Button } from '../components/Button';
 import { InternshipCard } from '../components/InternshipCard';
@@ -28,6 +29,7 @@ export function HomePage({
   userProfile,
   onNavigateToProfile
 }: HomePageProps) {
+  const navigate = useNavigate();
   const [selectedInternship, setSelectedInternship] = useState<string | null>(null);
   const [profileCompletion, setProfileCompletion] = useState<{ percentage: number; isComplete: boolean } | null>(null);
 
@@ -210,7 +212,7 @@ export function HomePage({
                   variant="default"
                   onSave={onSaveInternship}
                   onViewDetails={setSelectedInternship}
-                  onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+                  onApply={(id) => navigate(`/apply/${id}`)}
                   isSaved={savedInternshipIds.includes(internship.id)}
                 />
               ))}
@@ -240,7 +242,7 @@ export function HomePage({
                     variant={index === 0 ? 'hero' : 'default'}
                     onSave={onSaveInternship}
                     onViewDetails={setSelectedInternship}
-                    onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+                    onApply={(id) => navigate(`/apply/${id}`)}
                     isSaved={savedInternshipIds.includes(internship.id)}
                   />
                 </div>
@@ -284,7 +286,7 @@ export function HomePage({
         internship={selectedDetail}
         isOpen={selectedInternship !== null}
         onClose={() => setSelectedInternship(null)}
-        onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+        onApply={(id) => navigate(`/apply/${id}`)}
         onSave={onSaveInternship}
         isSaved={selectedInternship ? savedInternshipIds.includes(selectedInternship) : false}
       />

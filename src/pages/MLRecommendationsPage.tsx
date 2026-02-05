@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -68,6 +69,7 @@ export function MLRecommendationsPage({
     getQuickMatch
   } = useMLRecommendations();
   
+  const navigate = useNavigate();
   const [selectedInternship, setSelectedInternship] = useState<string | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<JobMatch | null>(null);
   const [selectedMatchInfo, setSelectedMatchInfo] = useState<SkillMatchInfo | null>(null);
@@ -316,7 +318,7 @@ export function MLRecommendationsPage({
                             variant={index === 0 ? 'hero' : 'default'}
                             onSave={onSaveInternship}
                             onViewDetails={handleViewDetails}
-                            onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+                            onApply={(id) => navigate(`/apply/${id}`)}
                             isSaved={savedInternshipIds.includes(match.job.id)}
                           />
                           
@@ -404,7 +406,7 @@ export function MLRecommendationsPage({
                             internship={match.job}
                             onSave={onSaveInternship}
                             onViewDetails={handleViewDetails}
-                            onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+                            onApply={(id) => navigate(`/apply/${id}`)}
                             isSaved={savedInternshipIds.includes(match.job.id)}
                           />
                         </Box>
@@ -437,7 +439,7 @@ export function MLRecommendationsPage({
                             internship={match.job}
                             onSave={onSaveInternship}
                             onViewDetails={handleViewDetails}
-                            onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+                            onApply={(id) => navigate(`/apply/${id}`)}
                             isSaved={savedInternshipIds.includes(match.job.id)}
                           />
                         </Box>
@@ -484,7 +486,7 @@ export function MLRecommendationsPage({
           setSelectedMatch(null);
           setSelectedMatchInfo(null);
         }}
-        onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+        onApply={(id) => navigate(`/apply/${id}`)}
         onSave={onSaveInternship}
         isSaved={selectedInternship ? savedInternshipIds.includes(selectedInternship) : false}
         matchInfo={selectedMatchInfo}

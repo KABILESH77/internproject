@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Info, Sparkles, RefreshCw, TrendingUp, Target, MapPin } from 'lucide-react';
 import { Button } from '../components/Button';
 import { InternshipCard } from '../components/InternshipCard';
@@ -27,6 +28,7 @@ export function RecommendationsPage({
   userProfile,
   weights = { skill: 40, interest: 35, location: 25 }
 }: RecommendationsPageProps) {
+  const navigate = useNavigate();
   const [showExplanation, setShowExplanation] = useState(false);
   const [selectedInternship, setSelectedInternship] = useState<string | null>(null);
   const [displayCount, setDisplayCount] = useState(4);
@@ -184,7 +186,7 @@ export function RecommendationsPage({
                 variant={index === 0 ? 'hero' : 'default'}
                 onSave={onSaveInternship}
                 onViewDetails={setSelectedInternship}
-                onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+                onApply={(id) => navigate(`/apply/${id}`)}
                 isSaved={savedInternshipIds.includes(internship.id)}
               />
 
@@ -268,7 +270,7 @@ export function RecommendationsPage({
         internship={selectedDetail}
         isOpen={selectedInternship !== null}
         onClose={() => setSelectedInternship(null)}
-        onApply={(id) => window.open(`/apply/${id}`, '_blank')}
+        onApply={(id) => navigate(`/apply/${id}`)}
         onSave={onSaveInternship}
         isSaved={selectedInternship ? savedInternshipIds.includes(selectedInternship) : false}
       />
